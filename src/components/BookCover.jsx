@@ -1,187 +1,173 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function BookCover({ restaurantName, onOpen, lang }) {
-  const [opening, setOpening] = useState(false);
-  const [opened, setOpened] = useState(false);
+/*
+  BookCover — s'affiche EN OVERLAY par-dessus le menu déjà chargé.
+  Quand l'utilisateur clique, la couverture pivote et disparaît,
+  révélant le menu exactement à sa place. Aucun re-layout.
+*/
+export default function BookCover({ restaurantName, onOpen, lang, visible }) {
+  const [phase, setPhase] = useState('idle'); // idle | opening | gone
 
   const handleOpen = () => {
-    if (opening || opened) return;
-    setOpening(true);
+    if (phase !== 'idle') return;
+    setPhase('opening');
     setTimeout(() => {
-      setOpened(true);
+      setPhase('gone');
       onOpen();
-    }, 1200);
+    }, 900);
   };
+
+  if (!visible && phase !== 'opening') return null;
+  if (phase === 'gone') return null;
 
   const L = lang === 'en'
     ? { cta: 'Open Menu', subtitle: 'Discover our creations' }
     : { cta: 'Ouvrir le menu', subtitle: 'Découvrez nos créations' };
 
-  if (opened) return null;
-
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 200,
+      position: 'fixed', inset: 0, zIndex: 300,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'radial-gradient(ellipse at top, #2a1505 0%, #0d0500 65%)',
-      perspective: '1200px',
+      background: 'radial-gradient(ellipse at 50% 30%, #2a1505 0%, #0d0500 70%)',
+      perspective: '1400px',
     }}>
       <style>{`
-        @keyframes coverOpen {
-          0%   { transform: rotateY(0deg);    }
-          100% { transform: rotateY(-150deg); }
+        @keyframes coverReveal {
+          0%   { transform: rotateY(0deg) translateZ(0); opacity: 1; }
+          60%  { transform: rotateY(-95deg) translateZ(20px); opacity: 1; }
+          100% { transform: rotateY(-110deg) translateZ(10px); opacity: 0; }
         }
-        @keyframes coverGlow {
-          0%, 100% { box-shadow: 0 0 30px rgba(201,168,76,0.3), 0 25px 60px rgba(0,0,0,0.8); }
-          50%       { box-shadow: 0 0 60px rgba(201,168,76,0.6), 0 25px 60px rgba(0,0,0,0.8); }
+        @keyframes goldShimmer {
+          0%   { background-position: -300% center; }
+          100% { background-position: 300% center; }
         }
-        @keyframes shimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position: 200% center; }
+        @keyframes coverPulse {
+          0%,100% { box-shadow: 0 0 25px rgba(201,168,76,0.2), 0 30px 70px rgba(0,0,0,0.85); }
+          50%      { box-shadow: 0 0 55px rgba(201,168,76,0.45), 0 30px 70px rgba(0,0,0,0.85); }
         }
-        @keyframes floatIn {
-          from { opacity: 0; transform: translateY(30px); }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(18px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-        @keyframes ornamentSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        .cover-book {
+        .cover-wrap {
           transform-origin: left center;
           transform-style: preserve-3d;
-          animation: coverGlow 3s ease-in-out infinite;
+          animation: coverPulse 3.5s ease-in-out infinite;
           cursor: pointer;
-          transition: transform 0.3s ease;
+          transition: filter 0.2s;
         }
-        .cover-book.opening {
-          animation: coverOpen 1.2s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards !important;
+        .cover-wrap:hover { filter: brightness(1.12); }
+        .cover-wrap.opening {
+          animation: coverReveal 0.9s cubic-bezier(0.77,0,0.18,1) forwards !important;
         }
-        .cover-book:not(.opening):hover {
-          transform: rotateY(-8deg) translateX(8px);
-        }
-        .shimmer-text {
-          background: linear-gradient(90deg, #c9a84c 0%, #e8d08a 40%, #fff8e1 50%, #e8d08a 60%, #c9a84c 100%);
-          background-size: 200% auto;
+        .gold-shimmer {
+          background: linear-gradient(90deg,
+            #a07830 0%, #c9a84c 30%, #f0d882 50%, #c9a84c 70%, #a07830 100%);
+          background-size: 300% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          animation: shimmer 3s linear infinite;
+          animation: goldShimmer 4s linear infinite;
+        }
+        .cta-pulse {
+          animation: fadeUp 0.8s ease 0.6s both;
         }
       `}</style>
 
-      {/* Livre - couverture */}
       <div
-        className={`cover-book${opening ? ' opening' : ''}`}
+        className={'cover-wrap' + (phase === 'opening' ? ' opening' : '')}
         onClick={handleOpen}
         style={{
-          width: 280, height: 380,
+          width: 'min(72vw, 300px)',
+          height: 'min(68vh, 440px)',
           position: 'relative',
-          borderRadius: '4px 16px 16px 4px',
-          background: 'linear-gradient(135deg, #1a0800 0%, #2d1200 40%, #1a0800 100%)',
-          border: '2px solid rgba(201,168,76,0.5)',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.8), inset 4px 0 12px rgba(0,0,0,0.5)',
+          borderRadius: '6px 18px 18px 6px',
+          background: 'linear-gradient(160deg, #1f0c02 0%, #2e1400 45%, #1a0800 100%)',
+          border: '1.5px solid rgba(201,168,76,0.45)',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          padding: '32px 24px',
-          gap: 16,
+          padding: '10% 8%',
+          gap: 'min(3vh, 14px)',
           userSelect: 'none',
+          overflow: 'hidden',
         }}
       >
         {/* Reliure gauche */}
         <div style={{
-          position: 'absolute', left: 0, top: 0, bottom: 0, width: 18,
-          background: 'linear-gradient(to right, #0d0500, #2a1505)',
-          borderRadius: '4px 0 0 4px',
-          borderRight: '1px solid rgba(201,168,76,0.3)',
+          position: 'absolute', left: 0, top: 0, bottom: 0, width: 20,
+          background: 'linear-gradient(to right, #080300, #1c0a00, #100600)',
+          borderRadius: '6px 0 0 6px',
+          borderRight: '1px solid rgba(201,168,76,0.25)',
         }} />
 
-        {/* Ornement haut */}
-        <div style={{
-          position: 'absolute', top: 20, left: '50%', transform: 'translateX(-50%)',
-          width: 180, height: 1,
-          background: 'linear-gradient(to right, transparent, #c9a84c, transparent)',
-        }} />
-        <div style={{
-          position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)',
-          fontSize: 14, color: '#c9a84c', letterSpacing: 6, whiteSpace: 'nowrap',
-        }}>✦ ✦ ✦</div>
+        {/* Filet haut */}
+        <div style={{ position: 'absolute', top: 18, left: 28, right: 16,
+          height: 1, background: 'linear-gradient(to right, rgba(201,168,76,0.6), rgba(201,168,76,0.15))' }} />
+        <div style={{ position: 'absolute', top: 24, left: 28, right: 16,
+          height: 1, background: 'linear-gradient(to right, rgba(201,168,76,0.25), transparent)' }} />
 
-        {/* Logo / Emblème central */}
+        {/* Emblème */}
         <div style={{
-          width: 80, height: 80,
-          border: '2px solid rgba(201,168,76,0.6)',
+          width: 'min(18vw, 74px)', height: 'min(18vw, 74px)',
+          border: '1.5px solid rgba(201,168,76,0.5)',
           borderRadius: '50%',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)',
-          marginBottom: 8,
-          position: 'relative',
+          background: 'radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)',
+          position: 'relative', flexShrink: 0,
         }}>
-          <span style={{ fontSize: 36 }}>🍽️</span>
-          {/* Cercle décoratif */}
+          <span style={{ fontSize: 'min(9vw, 34px)' }}>🍽️</span>
           <div style={{
-            position: 'absolute', inset: -8,
-            border: '1px solid rgba(201,168,76,0.25)',
+            position: 'absolute', inset: -7,
+            border: '1px solid rgba(201,168,76,0.18)',
             borderRadius: '50%',
           }} />
         </div>
 
-        {/* Nom du restaurant */}
-        <h1 className="shimmer-text" style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 22, fontWeight: 900,
-          textAlign: 'center', lineHeight: 1.3,
-          letterSpacing: '1px',
-        }}>
-          {restaurantName || 'Notre Menu'}
-        </h1>
+        {/* Titre */}
+        <h1 className="gold-shimmer" style={{
+          fontFamily: "'Cormorant Garamond','Playfair Display',serif",
+          fontSize: 'min(6vw, 22px)', fontWeight: 700,
+          textAlign: 'center', lineHeight: 1.25,
+          letterSpacing: '1.5px', margin: 0,
+        }}>{restaurantName || 'Notre Menu'}</h1>
 
-        {/* Ligne décorative */}
-        <div style={{
-          width: 120, height: 1,
-          background: 'linear-gradient(to right, transparent, #c9a84c, transparent)',
-        }} />
+        {/* Filet décoratif */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '70%' }}>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.5))' }} />
+          <span style={{ color: 'rgba(201,168,76,0.6)', fontSize: 10 }}>✦</span>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(201,168,76,0.5))' }} />
+        </div>
 
         {/* Sous-titre */}
         <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 11, color: 'rgba(201,168,76,0.65)',
-          textAlign: 'center', letterSpacing: '2px',
-          textTransform: 'uppercase', fontStyle: 'italic',
+          fontFamily: "'Cormorant Garamond',serif",
+          fontSize: 'min(3.2vw, 11px)', color: 'rgba(201,168,76,0.55)',
+          textAlign: 'center', letterSpacing: '2.5px',
+          textTransform: 'uppercase', fontStyle: 'italic', margin: 0,
         }}>{L.subtitle}</p>
 
-        {/* Ornement bas */}
-        <div style={{
-          position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-          width: 180, height: 1,
-          background: 'linear-gradient(to right, transparent, #c9a84c, transparent)',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
-          fontSize: 14, color: '#c9a84c', letterSpacing: 6, whiteSpace: 'nowrap',
-        }}>✦ ✦ ✦</div>
-
         {/* CTA */}
-        <div style={{
-          position: 'absolute', bottom: 38, left: '50%', transform: 'translateX(-50%)',
-          background: 'rgba(201,168,76,0.1)',
-          border: '1px solid rgba(201,168,76,0.4)',
-          borderRadius: 20, padding: '6px 20px',
-          fontSize: 10, color: '#c9a84c', letterSpacing: '1.5px',
-          textTransform: 'uppercase', whiteSpace: 'nowrap',
-          animation: 'floatIn 1s ease forwards',
+        <div className="cta-pulse" style={{
+          position: 'absolute', bottom: '8%',
+          border: '1px solid rgba(201,168,76,0.35)',
+          borderRadius: 20, padding: 'min(1.5vh,6px) min(4vw,18px)',
+          fontSize: 'min(3vw, 10px)', color: 'rgba(201,168,76,0.75)',
+          letterSpacing: '2px', textTransform: 'uppercase',
+          whiteSpace: 'nowrap',
+          background: 'rgba(201,168,76,0.06)',
         }}>{L.cta} →</div>
-      </div>
 
-      {/* Pages visibles sur la tranche droite (effet épaisseur livre) */}
-      <div style={{
-        position: 'absolute',
-        width: 12, height: 376,
-        background: 'repeating-linear-gradient(to bottom, #f5efe0 0px, #f5efe0 2px, #e0d4ba 2px, #e0d4ba 4px)',
-        left: 'calc(50% + 140px)',
-        borderRadius: '0 2px 2px 0',
-        boxShadow: '3px 0 8px rgba(0,0,0,0.4)',
-        transform: 'translateY(-8px)',
-      }} />
+        {/* Filet bas */}
+        <div style={{ position: 'absolute', bottom: 22, left: 28, right: 16,
+          height: 1, background: 'linear-gradient(to right, rgba(201,168,76,0.35), transparent)' }} />
+
+        {/* Tranche pages (effet épaisseur) */}
+        <div style={{
+          position: 'absolute', right: -9, top: 3, bottom: 3, width: 9,
+          background: 'repeating-linear-gradient(to bottom,#f5efe0 0,#f5efe0 2px,#d8ccb0 2px,#d8ccb0 4px)',
+          borderRadius: '0 2px 2px 0',
+          boxShadow: '4px 0 10px rgba(0,0,0,0.4)',
+        }} />
+      </div>
     </div>
   );
 }
