@@ -19,7 +19,7 @@ function ProduitCard({ produit, onAdd, lang, isMobile }) {
       style={{
         display: 'flex', gap: 8,
         padding: isMobile ? '7px 4px' : '9px 6px',
-        borderBottom: '1px solid rgba(90,58,26,0.16)',
+        borderBottom: '1px solid rgba(80,50,30,0.16)',
         alignItems: 'center',
         borderRadius: 8,
         background: hovered ? 'rgba(201,168,76,0.07)' : 'transparent',
@@ -32,7 +32,7 @@ function ProduitCard({ produit, onAdd, lang, isMobile }) {
       <div style={{
         width: isMobile ? 44 : 52, height: isMobile ? 44 : 52,
         borderRadius: 8, flexShrink: 0,
-        background: 'rgba(90,58,26,0.12)',
+        background: 'rgba(80,50,30,0.12)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         overflow: 'hidden',
         border: hovered ? '1px solid rgba(201,168,76,0.4)' : '1px solid transparent',
@@ -60,7 +60,7 @@ function ProduitCard({ produit, onAdd, lang, isMobile }) {
         {produit.description && !isMobile && (
           <p style={{
             fontFamily: "'Cormorant Garamond',serif",
-            fontSize: 10.5, color: '#7a5a3a', lineHeight: 1.35, marginBottom: 2,
+            fontSize: 10.5, color: '#8A6A5A', lineHeight: 1.35, marginBottom: 2,
             fontStyle: 'italic',
           }}>
             {produit.description.length > 48
@@ -70,11 +70,11 @@ function ProduitCard({ produit, onAdd, lang, isMobile }) {
         )}
         <p style={{
           fontFamily: "'Cormorant Garamond',serif",
-          fontSize: isMobile ? 14 : 16, fontWeight: 700, color: '#7a4010',
+          fontSize: isMobile ? 14 : 16, fontWeight: 700, color: '#C4622D',
           letterSpacing: '-0.2px',
         }}>
           {Number(produit.prix).toFixed(2)}
-          <span style={{ fontSize: 9, fontWeight: 400, color: '#9a6a3a' }}> €</span>
+          <span style={{ fontSize: 9, fontWeight: 400, color: '#A07050' }}> €</span>
         </p>
       </div>
 
@@ -83,8 +83,8 @@ function ProduitCard({ produit, onAdd, lang, isMobile }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <button onClick={() => setQty(q => Math.max(0, q - 1))} style={{
             width: isMobile ? 26 : 22, height: isMobile ? 26 : 22,
-            borderRadius: '50%', border: '1.5px solid #8B4513',
-            background: 'transparent', color: '#8B4513',
+            borderRadius: '50%', border: '1.5px solid #C4622D',
+            background: 'transparent', color: '#C4622D',
             fontSize: 14, fontWeight: 700, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             touchAction: 'manipulation',
@@ -96,16 +96,16 @@ function ProduitCard({ produit, onAdd, lang, isMobile }) {
           <button onClick={() => setQty(q => q + 1)} style={{
             width: isMobile ? 26 : 22, height: isMobile ? 26 : 22,
             borderRadius: '50%', border: 'none',
-            background: 'linear-gradient(135deg,#8B4513,#b0541a)',
+            background: 'linear-gradient(135deg,#C4622D,#D4724A)',
             color: 'white', fontSize: 14, fontWeight: 700,
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
             touchAction: 'manipulation',
-            boxShadow: '0 2px 6px rgba(139,69,19,0.3)',
+            boxShadow: '0 2px 6px rgba(196,98,45,0.3)',
           }}>+</button>
         </div>
         {qty > 0 && (
           <button onClick={handleAdd} style={{
-            background: 'linear-gradient(135deg,#8B4513,#c0622a)',
+            background: 'linear-gradient(135deg,#C4622D,#E8936A)',
             color: 'white', border: 'none', borderRadius: 5,
             padding: '3px 7px', fontSize: 9, fontWeight: 700,
             cursor: 'pointer', whiteSpace: 'nowrap', touchAction: 'manipulation',
@@ -124,9 +124,9 @@ function GoldLine({ small }) {
       display: 'flex', alignItems: 'center', gap: 6,
       margin: small ? '3px 0 5px' : '4px 0 8px',
     }}>
-      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right,transparent,rgba(139,69,19,0.3))' }} />
-      <span style={{ fontSize: 8, color: 'rgba(139,69,19,0.45)', letterSpacing: 2 }}>✦</span>
-      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left,transparent,rgba(139,69,19,0.3))' }} />
+      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right,transparent,rgba(196,98,45,0.3))' }} />
+      <span style={{ fontSize: 8, color: 'rgba(196,98,45,0.45)', letterSpacing: 2 }}>✦</span>
+      <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left,transparent,rgba(196,98,45,0.3))' }} />
     </div>
   );
 }
@@ -149,7 +149,7 @@ function PageContent({ produits, categorie, pageNum, totalPages, onAdd, lang, si
       {/* Lignes papier */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
-        backgroundImage: 'repeating-linear-gradient(transparent,transparent 23px,rgba(90,58,26,0.05) 23px,rgba(90,58,26,0.05) 24px)',
+        backgroundImage: 'repeating-linear-gradient(transparent,transparent 23px,rgba(80,50,30,0.05) 23px,rgba(80,50,30,0.05) 24px)',
         backgroundPositionY: '40px',
       }} />
 
@@ -163,7 +163,7 @@ function PageContent({ produits, categorie, pageNum, totalPages, onAdd, lang, si
             <span style={{ fontSize: isMobile ? 12 : 14 }}>{categorie.emoji || '🍽️'}</span>
             <span style={{
               fontFamily: "'Cormorant Garamond','Playfair Display',serif",
-              fontSize: isMobile ? 13 : 16, fontWeight: 700, color: '#7a4010',
+              fontSize: isMobile ? 13 : 16, fontWeight: 700, color: '#C4622D',
               letterSpacing: '0.4px',
             }}>{categorie.nom}</span>
           </div>
@@ -181,7 +181,7 @@ function PageContent({ produits, categorie, pageNum, totalPages, onAdd, lang, si
       {/* Numéro page */}
       <p style={{
         textAlign: side === 'left' ? 'left' : 'right',
-        fontSize: 8, color: 'rgba(90,58,26,0.28)',
+        fontSize: 8, color: 'rgba(80,50,30,0.28)',
         fontStyle: 'italic', marginTop: 3,
         fontFamily: "'Cormorant Garamond',serif",
         letterSpacing: '1px', position: 'relative',
@@ -312,7 +312,7 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
           {/* Lignes papier */}
           <div style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
-            backgroundImage: 'repeating-linear-gradient(transparent,transparent 23px,rgba(90,58,26,0.05) 23px,rgba(90,58,26,0.05) 24px)',
+            backgroundImage: 'repeating-linear-gradient(transparent,transparent 23px,rgba(80,50,30,0.05) 23px,rgba(80,50,30,0.05) 24px)',
             backgroundPositionY: '40px',
           }} />
 
@@ -323,7 +323,7 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
                 <span style={{ fontSize:14 }}>{page.categorie?.emoji || '🍽️'}</span>
                 <span style={{
                   fontFamily:"'Cormorant Garamond','Playfair Display',serif",
-                  fontSize:15, fontWeight:700, color:'#7a4010', letterSpacing:'0.3px',
+                  fontSize:15, fontWeight:700, color:'#C4622D', letterSpacing:'0.3px',
                 }}>{page.categorie?.nom}</span>
               </div>
               <GoldLine small />
@@ -337,7 +337,7 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
 
           {/* Numéro */}
           <p style={{
-            textAlign:'right', fontSize:8, color:'rgba(90,58,26,0.28)',
+            textAlign:'right', fontSize:8, color:'rgba(80,50,30,0.28)',
             fontStyle:'italic', marginTop:4,
             fontFamily:"'Cormorant Garamond',serif", letterSpacing:'1px', position:'relative',
           }}>{spread+1} / {pages.length}</p>
@@ -347,8 +347,8 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
         <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:16 }}>
           <button onClick={() => flip('prev')} disabled={spread<=0||flipping} style={{
             width:44, height:44, borderRadius:22,
-            background: spread<=0 ? 'rgba(201,168,76,0.08)' : 'rgba(201,168,76,0.18)',
-            border:'1px solid rgba(201,168,76,0.3)', color:'#c9a84c',
+            background: spread<=0 ? 'rgba(196,98,45,0.08)' : 'rgba(196,98,45,0.18)',
+            border:'1px solid rgba(196,98,45,0.3)', color:'#E8936A',
             fontSize:18, cursor: spread<=0?'not-allowed':'pointer',
             opacity: spread<=0?0.3:1, transition:'all 0.2s',
             display:'flex', alignItems:'center', justifyContent:'center',
@@ -364,7 +364,7 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
                 <div key={i} style={{
                   width: active?10:6, height: active?10:6,
                   borderRadius:'50%',
-                  background: active?'#c9a84c':'rgba(201,168,76,0.22)',
+                  background: active?'#c9a84c':'rgba(196,98,45,0.2)',
                   transition:'all 0.2s ease',
                 }} />
               );
@@ -373,8 +373,8 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
 
           <button onClick={() => flip('next')} disabled={spread>=pages.length-1||flipping} style={{
             width:44, height:44, borderRadius:22,
-            background: spread>=pages.length-1 ? 'rgba(201,168,76,0.08)' : 'rgba(201,168,76,0.18)',
-            border:'1px solid rgba(201,168,76,0.3)', color:'#c9a84c',
+            background: spread>=pages.length-1 ? 'rgba(196,98,45,0.08)' : 'rgba(196,98,45,0.18)',
+            border:'1px solid rgba(196,98,45,0.3)', color:'#E8936A',
             fontSize:18, cursor: spread>=pages.length-1?'not-allowed':'pointer',
             opacity: spread>=pages.length-1?0.3:1, transition:'all 0.2s',
             display:'flex', alignItems:'center', justifyContent:'center',
@@ -456,8 +456,8 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
       {/* Nav desktop */}
       <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:20 }}>
         <button onClick={() => flip('prev')} disabled={spread<=0||flipping} style={{
-          background:'transparent', border:'1px solid rgba(201,168,76,0.3)',
-          color:'#c9a84c', borderRadius:8, padding:'8px 20px', fontSize:13,
+          background:'transparent', border:'1px solid rgba(196,98,45,0.3)',
+          color:'#E8936A', borderRadius:8, padding:'8px 20px', fontSize:13,
           fontFamily:"'Cormorant Garamond',serif", fontWeight:600, letterSpacing:'1px',
           cursor: spread<=0?'not-allowed':'pointer', opacity: spread<=0?0.3:1, transition:'all 0.2s',
         }}>◀ {lang==='en'?'Previous':'Précédent'}</button>
@@ -468,8 +468,8 @@ export default function Book3D({ pages, onAdd, lang, isMobile }) {
         }}>{spread+1} / {totalSpreads}</span>
 
         <button onClick={() => flip('next')} disabled={spread>=totalSpreads-1||flipping} style={{
-          background:'transparent', border:'1px solid rgba(201,168,76,0.3)',
-          color:'#c9a84c', borderRadius:8, padding:'8px 20px', fontSize:13,
+          background:'transparent', border:'1px solid rgba(196,98,45,0.3)',
+          color:'#E8936A', borderRadius:8, padding:'8px 20px', fontSize:13,
           fontFamily:"'Cormorant Garamond',serif", fontWeight:600, letterSpacing:'1px',
           cursor: spread>=totalSpreads-1?'not-allowed':'pointer',
           opacity: spread>=totalSpreads-1?0.3:1, transition:'all 0.2s',

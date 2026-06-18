@@ -115,13 +115,13 @@ export default function MenuPage() {
   return (
     <div style={{
       minHeight: '100dvh',
-      background: 'radial-gradient(ellipse at top,#2a1505 0%,#0d0500 65%)',
+      background: 'radial-gradient(ellipse at top,#1C1208 0%,#0F0F0E 70%)',
       display: 'flex', flexDirection: 'column',
     }}>
 
       {/* ══ COUVERTURE (overlay, ne perturbe pas le layout) ══ */}
       <BookCover
-        restaurantName="Notre Menu"
+        restaurantName="MALAMU"
         onOpen={() => setCoverOpen(true)}
         lang={lang}
         visible={!coverOpen}
@@ -131,16 +131,16 @@ export default function MenuPage() {
       <header style={{
         padding: isMobile ? '10px 14px' : '14px 28px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(201,168,76,0.15)',
+        borderBottom: '1px solid rgba(196,98,45,0.15)',
         backdropFilter: 'blur(12px)',
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(13,5,0,0.9)',
+        background: 'rgba(15,15,14,0.92)',
         gap: 8,
       }}>
         <h1 style={{
           fontFamily: "'Cormorant Garamond','Playfair Display',serif",
           fontSize: isMobile ? 17 : 24, fontWeight: 700,
-          background: 'linear-gradient(135deg,#c9a84c,#e8d08a)',
+          background: 'linear-gradient(135deg,#C4622D,#E8936A)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           letterSpacing: '0.5px', whiteSpace: 'nowrap', flexShrink: 0,
         }}>✦ {L.titre}</h1>
@@ -148,34 +148,34 @@ export default function MenuPage() {
         <div style={{ display:'flex', alignItems:'center', gap: isMobile?6:10 }}>
           {/* Langue */}
           <button onClick={() => setLang(l => l==='fr'?'en':'fr')} style={{
-            background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.25)',
-            color:'#c9a84c', borderRadius:8, padding: isMobile?'5px 9px':'7px 13px',
+            background:'rgba(196,98,45,0.1)', border:'1px solid rgba(196,98,45,0.25)',
+            color:'#E8936A', borderRadius:8, padding: isMobile?'5px 9px':'7px 13px',
             fontSize: isMobile?11:12, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap',
           }}>{lang==='fr'?'🇬🇧':'🇫🇷'}</button>
 
           {/* Appel serveur */}
           <button onClick={() => setShowAppel(true)} style={{
-            background:'rgba(201,168,76,0.1)', border:'1px solid rgba(201,168,76,0.25)',
-            color:'#c9a84c', borderRadius:8, padding: isMobile?'5px 9px':'7px 13px',
+            background:'rgba(196,98,45,0.1)', border:'1px solid rgba(196,98,45,0.25)',
+            color:'#E8936A', borderRadius:8, padding: isMobile?'5px 9px':'7px 13px',
             fontSize: isMobile?11:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap',
           }}>{isMobile?'🔔':L.appelServeurFull}</button>
 
           {/* Panier */}
           <button onClick={() => setShowPanier(true)} style={{
             background: totalItems>0
-              ? 'linear-gradient(135deg,#c9a84c,#e8d08a)'
-              : 'rgba(201,168,76,0.1)',
-            border:'1px solid rgba(201,168,76,0.25)',
-            color: totalItems>0?'#1a0a00':'#c9a84c',
+              ? 'linear-gradient(135deg,#C4622D,#E8936A)'
+              : 'rgba(196,98,45,0.1)',
+            border:'1px solid rgba(196,98,45,0.25)',
+            color: totalItems>0?'#1a0a00':'#E8936A',
             borderRadius:8, padding: isMobile?'5px 10px':'7px 15px',
             fontSize: isMobile?11:13, fontWeight:700, cursor:'pointer',
             display:'flex', alignItems:'center', gap:5, whiteSpace:'nowrap',
-            boxShadow: totalItems>0?'0 3px 12px rgba(201,168,76,0.35)':'none',
+            boxShadow: totalItems>0?'0 3px 12px rgba(196,98,45,0.35)':'none',
           }}>
             🛒 {!isMobile && L.panier}
             {totalItems>0 && (
               <span style={{
-                background:'#1a0a00', color:'#c9a84c', borderRadius:'50%',
+                background:'#1a0a00', color:'#E8936A', borderRadius:'50%',
                 width: isMobile?18:22, height: isMobile?18:22,
                 display:'flex', alignItems:'center', justifyContent:'center',
                 fontSize: isMobile?10:11, fontWeight:800,
@@ -221,7 +221,7 @@ export default function MenuPage() {
               <div style={{ fontSize: isMobile?40:48, marginBottom:10 }}>🔔</div>
               <h2 style={{
                 fontFamily:"'Cormorant Garamond',serif",
-                fontSize: isMobile?18:21, color:'#c9a84c', fontWeight:700,
+                fontSize: isMobile?18:21, color:'#E8936A', fontWeight:700,
               }}>{L.tableModal}</h2>
             </div>
             <div style={{ marginBottom:16 }}>

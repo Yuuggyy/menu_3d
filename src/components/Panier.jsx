@@ -69,7 +69,7 @@ function ConfirmationScreen({ lang, onClose }) {
             width: 12, height: 12,
             border: '2px solid #27ae60',
             borderRadius: 2,
-            background: '#1a0a00',
+            background: 'var(--malamu-dark-2,#1A1917)',
           }} />
         ))}
 
@@ -101,12 +101,12 @@ function ConfirmationScreen({ lang, onClose }) {
       <button
         onClick={onClose}
         style={{
-          background: 'linear-gradient(135deg, #c9a84c, #e8d08a)',
+          background: 'linear-gradient(135deg,#C4622D,#E8936A)',
           border: 'none', borderRadius: 10,
           padding: '12px 32px',
           color: '#1a0a00', fontSize: 14, fontWeight: 700,
           cursor: 'pointer',
-          boxShadow: '0 4px 15px rgba(201,168,76,0.4)',
+          boxShadow: '0 4px 15px rgba(196,98,45,0.4)',
           animation: 'fadeSlideUp 0.5s ease 1.1s both',
           fontFamily: "'Cormorant Garamond', serif",
           letterSpacing: '1px',
@@ -144,7 +144,7 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: '#1a0a00', border: '1px solid rgba(201,168,76,0.3)',
+          background: 'var(--malamu-dark-2,#1A1917)', border: '1px solid rgba(196,98,45,0.3)',
           borderRadius: isMobile ? '20px 20px 0 0' : 16,
           width: '100%',
           maxWidth: isMobile ? '100%' : 500,
@@ -184,7 +184,7 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <h2 style={{
                 fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
-                fontSize: isMobile ? 20 : 23, color: '#c9a84c', fontWeight: 700, letterSpacing: '0.5px',
+                fontSize: isMobile ? 20 : 23, color: '#E8936A', fontWeight: 700, letterSpacing: '0.5px',
               }}>🛒 {L.panier}</h2>
               <button onClick={onClose} style={{
                 background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
@@ -213,7 +213,7 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
                           fontSize: isMobile ? 14 : 15, fontWeight: 600, color: '#f5efe0', marginBottom: 1,
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>{item.nom}</p>
-                        <p style={{ fontSize: 12, color: '#c9a84c', fontFamily: "'Cormorant Garamond', serif" }}>
+                        <p style={{ fontSize: 12, color: '#E8936A', fontFamily: "'Cormorant Garamond', serif" }}>
                           {Number(item.prix_unit).toFixed(2)} €
                         </p>
                       </div>
@@ -227,7 +227,7 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
                         <span style={{ fontSize: 13, fontWeight: 700, minWidth: 18, textAlign: 'center' }}>{item.quantite}</span>
                         <button onClick={() => onUpdateQty(idx, 1)} style={{
                           width: isMobile ? 30 : 27, height: isMobile ? 30 : 27, borderRadius: '50%',
-                          border: 'none', background: 'linear-gradient(135deg, #c9a84c, #e8d08a)', color: '#1a0a00',
+                          border: 'none', background: 'linear-gradient(135deg,#C4622D,#E8936A)', color: '#1a0a00',
                           cursor: 'pointer', fontSize: 16, touchAction: 'manipulation',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>+</button>
@@ -247,9 +247,9 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
                 }}>
-                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(201,168,76,0.3))' }} />
-                  <span style={{ color: 'rgba(201,168,76,0.4)', fontSize: 10 }}>✦</span>
-                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(201,168,76,0.3))' }} />
+                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(196,98,45,0.3))' }} />
+                  <span style={{ color: 'rgba(196,98,45,0.4)', fontSize: 10 }}>✦</span>
+                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(196,98,45,0.3))' }} />
                 </div>
                 <div style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -257,11 +257,11 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
                 }}>
                   <span style={{
                     fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 16, fontWeight: 700, color: '#c9a84c', letterSpacing: '1px',
+                    fontSize: 16, fontWeight: 700, color: '#E8936A', letterSpacing: '1px',
                   }}>{L.total}</span>
                   <span style={{
                     fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 22, fontWeight: 700, color: '#c9a84c',
+                    fontSize: 22, fontWeight: 700, color: '#E8936A',
                   }}>{total.toFixed(2)} €</span>
                 </div>
 
