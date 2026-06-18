@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getCategories, getProduits, appelServeur } from '../lib/supabase';
 import Book3D from '../components/Book3D';
-import BookCover from '../components/BookCover';
 import Panier from '../components/Panier';
 
+// Hook responsive
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
   useEffect(() => {
@@ -52,7 +52,6 @@ export default function MenuPage() {
   const [errAppel, setErrAppel]     = useState('');
   const [toast, setToast]           = useState('');
   const [appelLoading, setAppelLoading] = useState(false);
-  const [coverOpen, setCoverOpen]   = useState(false);
 
   const isMobile = useIsMobile();
   const L = T[lang];
@@ -94,7 +93,7 @@ export default function MenuPage() {
       }
       return [...prev, { ...produit }];
     });
-    showToast('✓ ' + produit.nom + ' ajouté');
+    showToast(`✓ ${produit.nom} ajouté`);
   };
 
   const handleUpdateQty = (idx, delta) => {
@@ -128,19 +127,12 @@ export default function MenuPage() {
 
   return (
     <div style={{
-      minHeight: '100dvh',
+      minHeight: '100dvh', // dynamic viewport height pour mobile
       background: 'radial-gradient(ellipse at top, #2a1505 0%, #0d0500 65%)',
       display: 'flex', flexDirection: 'column',
     }}>
 
-      {!coverOpen && (
-        <BookCover
-          restaurantName="Notre Menu"
-          onOpen={() => setCoverOpen(true)}
-          lang={lang}
-        />
-      )}
-
+      {/* ══ HEADER ══ */}
       <header style={{
         padding: isMobile ? '12px 16px' : '16px 28px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -149,10 +141,8 @@ export default function MenuPage() {
         position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(13,5,0,0.88)',
         gap: 8,
-        opacity: coverOpen ? 1 : 0,
-        transition: 'opacity 0.5s ease 0.3s',
-        pointerEvents: coverOpen ? 'auto' : 'none',
       }}>
+        {/* Titre */}
         <h1 style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: isMobile ? 18 : 24,
@@ -162,7 +152,9 @@ export default function MenuPage() {
           letterSpacing: '-0.3px', whiteSpace: 'nowrap', flexShrink: 0,
         }}>✦ {L.titre}</h1>
 
+        {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 6 : 10 }}>
+          {/* Langue */}
           <button onClick={() => setLang(l => l === 'fr' ? 'en' : 'fr')} style={{
             background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
             color: '#c9a84c', borderRadius: 8,
@@ -171,6 +163,7 @@ export default function MenuPage() {
             whiteSpace: 'nowrap',
           }}>{lang === 'fr' ? '🇬🇧' : '🇫🇷'}</button>
 
+          {/* Appel serveur */}
           <button onClick={() => setShowAppel(true)} style={{
             background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
             color: '#c9a84c', borderRadius: 8,
@@ -179,6 +172,7 @@ export default function MenuPage() {
             whiteSpace: 'nowrap',
           }}>{isMobile ? '🔔' : L.appelServeurFull}</button>
 
+          {/* Panier */}
           <button onClick={() => setShowPanier(true)} style={{
             background: totalItems > 0
               ? 'linear-gradient(135deg, #c9a84c, #e8d08a)'
@@ -206,13 +200,12 @@ export default function MenuPage() {
         </div>
       </header>
 
+      {/* ══ CONTENU PRINCIPAL ══ */}
       <main style={{
         flex: 1,
         padding: isMobile ? '16px 8px 80px' : '28px 20px 60px',
         maxWidth: 900, width: '100%', margin: '0 auto',
         boxSizing: 'border-box',
-        opacity: coverOpen ? 1 : 0,
-        transition: 'opacity 0.6s ease 0.5s',
       }}>
         {loading ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '80px 0' }}>
@@ -224,6 +217,7 @@ export default function MenuPage() {
         )}
       </main>
 
+      {/* ══ PANIER ══ */}
       {showPanier && (
         <Panier
           items={panier}
@@ -236,6 +230,7 @@ export default function MenuPage() {
         />
       )}
 
+      {/* ══ MODAL APPEL SERVEUR ══ */}
       {showAppel && (
         <div className="modal-overlay" onClick={() => setShowAppel(false)}>
           <div className="modal"
@@ -254,7 +249,7 @@ export default function MenuPage() {
                 placeholder={L.tablePh}
                 onKeyDown={e => e.key === 'Enter' && handleAppelServeur()}
                 autoFocus
-                style={{ fontSize: isMobile ? 16 : 14 }}
+                style={{ fontSize: isMobile ? 16 : 14 }} /* 16px évite le zoom iOS */
               />
               {errAppel && <p style={{ color: '#ff7675', fontSize: 12, marginTop: 6 }}>⚠️ {errAppel}</p>}
             </div>
@@ -263,13 +258,14 @@ export default function MenuPage() {
                 style={{ flex: 1, padding: isMobile ? '12px' : '10px' }}>{L.annuler}</button>
               <button className="btn btn-gold" onClick={handleAppelServeur} disabled={appelLoading}
                 style={{ flex: 1, padding: isMobile ? '12px' : '10px' }}>
-                {appelLoading ? '⏳' : '🔔 ' + L.envoyer}
+                {appelLoading ? '⏳' : `🔔 ${L.envoyer}`}
               </button>
             </div>
           </div>
         </div>
       )}
 
+      {/* ══ TOAST ══ */}
       {toast && (
         <div className="toast" style={{ fontSize: isMobile ? 13 : 14, maxWidth: '85vw' }}>
           {toast}
@@ -278,3 +274,4 @@ export default function MenuPage() {
     </div>
   );
 }
+
