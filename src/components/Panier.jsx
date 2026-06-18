@@ -3,125 +3,29 @@ import { createCommande } from '../lib/supabase';
 
 const T = {
   fr: {
-    panier: 'Ma Commande', vide: 'Panier vide',
-    table: 'Numéro de table *', tablePh: 'Ex: 5, Bar…',
+    titre: 'Ma Commande', vide: 'Votre panier est vide',
+    table: 'Numéro de table', tablePh: 'Table 5, Bar, Terrasse…',
     demandes: 'Demandes particulières', demandesPh: 'Allergies, sans sel…',
-    commander: 'Commander', total: 'Total',
-    confirmationLabel: 'COMMANDE ENVOYÉE',
-    confirmationSub: 'Votre commande a été transmise en cuisine.',
+    commander: 'Passer la commande', annuler: 'Fermer',
+    total: 'Total', confirmation: '✅ Commande envoyée !',
     errTable: 'Indiquez votre numéro de table.',
   },
   en: {
-    panier: 'My Order', vide: 'Empty cart',
-    table: 'Table number *', tablePh: 'e.g. 5, Bar…',
+    titre: 'My Order', vide: 'Your cart is empty',
+    table: 'Table number', tablePh: 'Table 5, Bar, Terrace…',
     demandes: 'Special requests', demandesPh: 'Allergies, no salt…',
-    commander: 'Place order', total: 'Total',
-    confirmationLabel: 'ORDER PLACED',
-    confirmationSub: 'Your order has been sent to the kitchen.',
-    errTable: 'Please enter your table number.',
+    commander: 'Place order', annuler: 'Close',
+    total: 'Total', confirmation: '✅ Order sent!',
+    errTable: 'Enter your table number.',
   },
 };
 
-/* ── Écran de confirmation avec stamp ── */
-function ConfirmationScreen({ lang, onClose }) {
-  const L = T[lang] || T.fr;
-  return (
-    <div style={{
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '48px 32px', gap: 24, textAlign: 'center',
-    }}>
-      <style>{`
-        @keyframes stampIn {
-          0%   { opacity: 0; transform: scale(2.5) rotate(-15deg); }
-          55%  { opacity: 1; transform: scale(0.88) rotate(4deg); }
-          75%  { transform: scale(1.06) rotate(-2deg); }
-          100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-        @keyframes fadeSlideUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes sparkle {
-          0%, 100% { opacity: 0; transform: scale(0); }
-          50%       { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
-
-      {/* Tampon central */}
-      <div style={{
-        border: '4px solid #27ae60',
-        borderRadius: 14,
-        padding: '18px 36px',
-        animation: 'stampIn 0.75s cubic-bezier(0.34,1.56,0.64,1) forwards',
-        opacity: 0,
-        position: 'relative',
-        boxShadow: '0 0 40px rgba(39,174,96,0.25), inset 0 0 20px rgba(39,174,96,0.08)',
-      }}>
-        {/* Coins décoratifs */}
-        {[['0','0'], ['0','auto'], ['auto','0'], ['auto','auto']].map(([t,b], i) => (
-          <div key={i} style={{
-            position: 'absolute',
-            top: t !== 'auto' ? -2 : 'auto',
-            bottom: b !== 'auto' ? -2 : 'auto',
-            left: i % 2 === 0 ? -2 : 'auto',
-            right: i % 2 !== 0 ? -2 : 'auto',
-            width: 12, height: 12,
-            border: '2px solid #27ae60',
-            borderRadius: 2,
-            background: 'var(--malamu-dark-2,#1A1917)',
-          }} />
-        ))}
-
-        <p style={{
-          fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
-          fontSize: 26, fontWeight: 700,
-          color: '#27ae60',
-          letterSpacing: '4px',
-          textTransform: 'uppercase',
-        }}>{L.confirmationLabel}</p>
-      </div>
-
-      {/* Icône check */}
-      <div style={{
-        fontSize: 52,
-        animation: 'fadeSlideUp 0.5s ease 0.7s both',
-      }}>✅</div>
-
-      {/* Message */}
-      <p style={{
-        fontFamily: "'Cormorant Garamond', serif",
-        fontSize: 16, color: 'rgba(245,239,224,0.7)',
-        fontStyle: 'italic', lineHeight: 1.6,
-        animation: 'fadeSlideUp 0.5s ease 0.9s both',
-        maxWidth: 280,
-      }}>{L.confirmationSub}</p>
-
-      {/* Bouton fermer */}
-      <button
-        onClick={onClose}
-        style={{
-          background: 'linear-gradient(135deg,#C4622D,#E8936A)',
-          border: 'none', borderRadius: 10,
-          padding: '12px 32px',
-          color: '#1a0a00', fontSize: 14, fontWeight: 700,
-          cursor: 'pointer',
-          boxShadow: '0 4px 15px rgba(196,98,45,0.4)',
-          animation: 'fadeSlideUp 0.5s ease 1.1s both',
-          fontFamily: "'Cormorant Garamond', serif",
-          letterSpacing: '1px',
-        }}
-      >Fermer ✦</button>
-    </div>
-  );
-}
-
-export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfirm, lang, isMobile }) {
-  const [table, setTable]         = useState('');
-  const [demandes, setDemandes]   = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState('');
-  const [confirmed, setConfirmed] = useState(false);
+export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfirm, lang }) {
+  const [table, setTable]       = useState('');
+  const [demandes, setDemandes] = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const [stamped, setStamped]   = useState(false);
   const L = T[lang] || T.fr;
 
   const total = items.reduce((s, i) => s + i.prix_unit * i.quantite, 0);
@@ -132,166 +36,265 @@ export default function Panier({ items, onUpdateQty, onRemove, onClose, onConfir
     const { error: err } = await createCommande(table.trim(), items, demandes.trim());
     setLoading(false);
     if (err) { setError(err.message); return; }
-    setConfirmed(true);
-    // Ferme + reset panier après 4 secondes
-    setTimeout(() => {
-      onConfirm('✅ ' + L.confirmationLabel);
-    }, 4000);
+    setStamped(true);
+    setTimeout(() => onConfirm(L.confirmation), 1400);
   };
 
   return (
-    <div className="modal-overlay" onClick={confirmed ? undefined : onClose}>
+    <div style={{
+      position:'fixed', inset:0,
+      background:'rgba(0,0,0,0.88)',
+      backdropFilter:'blur(16px)',
+      WebkitBackdropFilter:'blur(16px)',
+      zIndex:500,
+      display:'flex', alignItems:'flex-end',
+      justifyContent:'center',
+    }} onClick={onClose}>
+
+      <style>{`
+        @keyframes panier-slide-up {
+          from { opacity: 0; transform: translateY(100%); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes stamp-appear {
+          0%   { opacity: 0; transform: translate(-50%,-50%) scale(0.3) rotate(-18deg); }
+          60%  { opacity: 1; transform: translate(-50%,-50%) scale(1.08) rotate(-10deg); }
+          100% { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(-8deg); }
+        }
+        .panier-scroll::-webkit-scrollbar { width: 4px; }
+        .panier-scroll::-webkit-scrollbar-track { background: transparent; }
+        .panier-scroll::-webkit-scrollbar-thumb { background: rgba(196,98,45,0.3); border-radius: 2px; }
+        .item-label {
+          font-family: 'Inter', sans-serif;
+          font-size: 9px; font-weight: 700;
+          color: rgba(196,98,45,0.65);
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+          display: block;
+        }
+        .panier-input {
+          width: 100%; padding: 12px 14px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(196,98,45,0.2);
+          border-radius: 10px;
+          color: #F5EFE0;
+          font-family: 'Inter', sans-serif; font-size: 14px;
+          outline: none; transition: border 0.2s; resize: vertical;
+          box-sizing: border-box;
+        }
+        .panier-input:focus { border-color: #C4622D; background: rgba(196,98,45,0.04); }
+        .panier-input::placeholder { color: rgba(245,239,224,0.2); }
+      `}</style>
+
       <div
         onClick={e => e.stopPropagation()}
         style={{
-          background: 'var(--malamu-dark-2,#1A1917)', border: '1px solid rgba(196,98,45,0.3)',
-          borderRadius: isMobile ? '20px 20px 0 0' : 16,
-          width: '100%',
-          maxWidth: isMobile ? '100%' : 500,
-          maxHeight: isMobile ? '92dvh' : '88vh',
-          overflowY: 'auto',
-          padding: confirmed ? 0 : (isMobile ? '20px 16px 32px' : '28px 28px 28px'),
-          boxShadow: '0 -10px 40px rgba(0,0,0,0.7)',
-          ...(isMobile ? {
-            position: 'fixed', bottom: 0, left: 0, right: 0,
-            animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-          } : {
-            animation: 'modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-          }),
-        }}
-      >
-        <style>{`
-          @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to   { transform: translateY(0); }
-          }
-          @keyframes modalIn {
-            from { opacity:0; transform: scale(0.9) translateY(20px); }
-            to   { opacity:1; transform: scale(1) translateY(0); }
-          }
-        `}</style>
+          background:'#1A1917',
+          borderTop:'1px solid rgba(196,98,45,0.2)',
+          borderRadius:'24px 24px 0 0',
+          width:'100%', maxWidth:520,
+          maxHeight:'90dvh',
+          display:'flex', flexDirection:'column',
+          animation:'panier-slide-up 0.42s cubic-bezier(0.34,1.56,0.64,1)',
+          position:'relative', overflow:'hidden',
+        }}>
 
-        {/* ── CONFIRMATION ── */}
-        {confirmed ? (
-          <ConfirmationScreen lang={lang} onClose={() => onConfirm('✅ ' + L.confirmationLabel)} />
-        ) : (
-          <>
-            {isMobile && (
-              <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 16px' }} />
-            )}
-
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <h2 style={{
-                fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
-                fontSize: isMobile ? 20 : 23, color: '#E8936A', fontWeight: 700, letterSpacing: '0.5px',
-              }}>🛒 {L.panier}</h2>
-              <button onClick={onClose} style={{
-                background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)',
-                fontSize: 22, cursor: 'pointer', touchAction: 'manipulation',
-              }}>✕</button>
+        {/* Stamp confirmation */}
+        {stamped && (
+          <div style={{
+            position:'absolute', inset:0, zIndex:50,
+            background:'rgba(15,15,14,0.6)',
+            display:'flex', alignItems:'center', justifyContent:'center',
+          }}>
+            <div style={{
+              position:'absolute', top:'50%', left:'50%',
+              width:180, height:180,
+              border:'5px solid #C4622D',
+              borderRadius:8,
+              display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+              gap:6,
+              transform:'translate(-50%,-50%) rotate(-8deg)',
+              animation:'stamp-appear 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards',
+              opacity:0,
+              background:'rgba(15,15,14,0.85)',
+            }}>
+              <span style={{ fontSize:40 }}>✅</span>
+              <span style={{
+                fontFamily:"'Cormorant Garamond',serif",
+                fontSize:18, fontWeight:700, color:'#C4622D',
+                letterSpacing:2, textTransform:'uppercase',
+              }}>Envoyée</span>
             </div>
+          </div>
+        )}
 
-            {items.length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '36px 0', color: 'rgba(255,255,255,0.3)' }}>
-                <div style={{ fontSize: 44, marginBottom: 10 }}>🛒</div>
-                <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontStyle: 'italic' }}>{L.vide}</p>
-              </div>
-            ) : (
-              <>
-                {/* Articles */}
-                <div style={{ marginBottom: 16 }}>
-                  {items.map((item, idx) => (
-                    <div key={idx} style={{
-                      display: 'flex', alignItems: 'center', gap: 10,
-                      padding: isMobile ? '10px 0' : '11px 0',
-                      borderBottom: '1px solid rgba(255,255,255,0.07)',
-                    }}>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{
-                          fontFamily: "'Cormorant Garamond', serif",
-                          fontSize: isMobile ? 14 : 15, fontWeight: 600, color: '#f5efe0', marginBottom: 1,
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                        }}>{item.nom}</p>
-                        <p style={{ fontSize: 12, color: '#E8936A', fontFamily: "'Cormorant Garamond', serif" }}>
-                          {Number(item.prix_unit).toFixed(2)} €
-                        </p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <button onClick={() => onUpdateQty(idx, -1)} style={{
-                          width: isMobile ? 30 : 27, height: isMobile ? 30 : 27, borderRadius: '50%',
-                          border: '1px solid rgba(255,255,255,0.15)', background: 'transparent',
-                          color: 'white', cursor: 'pointer', fontSize: 16, touchAction: 'manipulation',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>−</button>
-                        <span style={{ fontSize: 13, fontWeight: 700, minWidth: 18, textAlign: 'center' }}>{item.quantite}</span>
-                        <button onClick={() => onUpdateQty(idx, 1)} style={{
-                          width: isMobile ? 30 : 27, height: isMobile ? 30 : 27, borderRadius: '50%',
-                          border: 'none', background: 'linear-gradient(135deg,#C4622D,#E8936A)', color: '#1a0a00',
-                          cursor: 'pointer', fontSize: 16, touchAction: 'manipulation',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>+</button>
-                        <button onClick={() => onRemove(idx)} style={{
-                          background: 'none', border: 'none', color: 'rgba(255,100,100,0.6)',
-                          cursor: 'pointer', fontSize: 16, padding: '0 2px', touchAction: 'manipulation',
-                        }}>🗑️</button>
-                      </div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: '#f5efe0', minWidth: 52, textAlign: 'right' }}>
-                        {(item.prix_unit * item.quantite).toFixed(2)} €
-                      </p>
-                    </div>
-                  ))}
-                </div>
+        {/* Drag handle */}
+        <div style={{ padding:'14px 0 8px', display:'flex', justifyContent:'center', flexShrink:0 }}>
+          <div style={{ width:38, height:4, borderRadius:2, background:'rgba(196,98,45,0.25)' }} />
+        </div>
 
-                {/* Ornement + Total */}
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12,
-                }}>
-                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, transparent, rgba(196,98,45,0.3))' }} />
-                  <span style={{ color: 'rgba(196,98,45,0.4)', fontSize: 10 }}>✦</span>
-                  <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, transparent, rgba(196,98,45,0.3))' }} />
-                </div>
-                <div style={{
-                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '8px 0', marginBottom: 18,
-                }}>
-                  <span style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 16, fontWeight: 700, color: '#E8936A', letterSpacing: '1px',
-                  }}>{L.total}</span>
-                  <span style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 22, fontWeight: 700, color: '#E8936A',
-                  }}>{total.toFixed(2)} €</span>
-                </div>
-
-                {/* Formulaire */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div>
-                    <label className="label">{L.table}</label>
-                    <input className="input" value={table} onChange={e => setTable(e.target.value)}
-                      placeholder={L.tablePh}
-                      style={{ fontSize: isMobile ? 16 : 14 }}
-                    />
-                  </div>
-                  <div>
-                    <label className="label">{L.demandes}</label>
-                    <textarea className="input" value={demandes} onChange={e => setDemandes(e.target.value)}
-                      placeholder={L.demandesPh} rows={2}
-                      style={{ resize: 'none', fontSize: isMobile ? 16 : 14 }} />
-                  </div>
-                  {error && <p style={{ color: '#ff7675', fontSize: 12 }}>⚠️ {error}</p>}
-                  <button className="btn btn-gold" onClick={handleSubmit} disabled={loading}
-                    style={{
-                      width: '100%', padding: isMobile ? 15 : 13, fontSize: isMobile ? 15 : 14,
-                      fontFamily: "'Cormorant Garamond', serif", letterSpacing: '1px', fontWeight: 700,
-                    }}>
-                    {loading ? '⏳ Envoi…' : '✦ ' + L.commander + ' ✦'}
-                  </button>
-                </div>
-              </>
+        {/* Header */}
+        <div style={{
+          padding:'0 22px 14px',
+          display:'flex', justifyContent:'space-between', alignItems:'center',
+          borderBottom:'1px solid rgba(196,98,45,0.1)',
+          flexShrink:0,
+        }}>
+          <div>
+            <p style={{
+              fontFamily:"'Cormorant Garamond',serif",
+              fontSize:22, fontWeight:600, color:'#F5EFE0',
+            }}>🛒 {L.titre}</p>
+            {items.length > 0 && (
+              <p style={{ fontSize:11, color:'rgba(196,98,45,0.55)', marginTop:1, fontFamily:"'Inter',sans-serif" }}>
+                {items.reduce((s,i)=>s+i.quantite,0)} article{items.reduce((s,i)=>s+i.quantite,0)>1?'s':''}
+              </p>
             )}
-          </>
+          </div>
+          <button onClick={onClose} style={{
+            width:34, height:34, borderRadius:'50%',
+            border:'1px solid rgba(196,98,45,0.2)',
+            background:'rgba(196,98,45,0.07)',
+            color:'rgba(245,239,224,0.5)',
+            fontSize:16, cursor:'pointer', outline:'none',
+            display:'flex', alignItems:'center', justifyContent:'center',
+          }}>✕</button>
+        </div>
+
+        {/* Corps scrollable */}
+        <div className="panier-scroll" style={{
+          flex:1, overflowY:'auto',
+          padding:'16px 22px',
+        }}>
+          {items.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'50px 0', color:'rgba(245,239,224,0.2)' }}>
+              <div style={{ fontSize:48, marginBottom:10 }}>🛒</div>
+              <p style={{ fontFamily:"'Cormorant Garamond',serif", fontSize:16, fontStyle:'italic' }}>{L.vide}</p>
+            </div>
+          ) : (
+            <>
+              {/* Articles */}
+              {items.map((item, idx) => (
+                <div key={idx} style={{
+                  display:'flex', alignItems:'center', gap:10,
+                  padding:'11px 0',
+                  borderBottom:'1px solid rgba(255,255,255,0.06)',
+                }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <p style={{
+                      fontFamily:"'Cormorant Garamond',serif",
+                      fontSize:15, fontWeight:600, color:'#F5EFE0',
+                      whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis',
+                    }}>{item.nom}</p>
+                    <p style={{ fontSize:12, color:'#C4622D', fontFamily:"'Cormorant Garamond',serif" }}>
+                      {Number(item.prix_unit).toFixed(2)} €
+                    </p>
+                  </div>
+                  {/* Qty */}
+                  <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                    <button onClick={() => onUpdateQty(idx,-1)} style={{
+                      width:28, height:28, borderRadius:'50%',
+                      border:'1px solid rgba(196,98,45,0.3)',
+                      background:'transparent', color:'#E8936A',
+                      cursor:'pointer', fontSize:15, fontWeight:700,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      outline:'none', touchAction:'manipulation',
+                    }}>−</button>
+                    <span style={{ fontSize:14, fontWeight:700, minWidth:18, textAlign:'center', color:'#F5EFE0' }}>
+                      {item.quantite}
+                    </span>
+                    <button onClick={() => onUpdateQty(idx,1)} style={{
+                      width:28, height:28, borderRadius:'50%',
+                      border:'none',
+                      background:'linear-gradient(135deg,#C4622D,#D4724A)',
+                      color:'white', cursor:'pointer', fontSize:15, fontWeight:700,
+                      display:'flex', alignItems:'center', justifyContent:'center',
+                      boxShadow:'0 2px 7px rgba(196,98,45,0.4)',
+                      outline:'none', touchAction:'manipulation',
+                    }}>+</button>
+                  </div>
+                  {/* Sous-total */}
+                  <p style={{
+                    fontSize:14, fontWeight:700, color:'#F5EFE0',
+                    minWidth:54, textAlign:'right',
+                    fontFamily:"'Cormorant Garamond',serif",
+                  }}>{(item.prix_unit * item.quantite).toFixed(2)} €</p>
+                  {/* Suppr */}
+                  <button onClick={() => onRemove(idx)} style={{
+                    background:'none', border:'none',
+                    color:'rgba(255,100,100,0.45)',
+                    cursor:'pointer', fontSize:14, padding:'0 2px',
+                    outline:'none', touchAction:'manipulation',
+                  }}>🗑</button>
+                </div>
+              ))}
+
+              {/* Total */}
+              <div style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'14px 0 4px',
+                borderTop:'1px solid rgba(196,98,45,0.25)',
+                marginTop:4,
+              }}>
+                <span style={{
+                  fontFamily:"'Cormorant Garamond',serif",
+                  fontSize:16, fontWeight:600, color:'rgba(245,239,224,0.7)',
+                }}>{L.total}</span>
+                <span style={{
+                  fontFamily:"'Cormorant Garamond',serif",
+                  fontSize:22, fontWeight:700, color:'#C4622D',
+                }}>{total.toFixed(2)} €</span>
+              </div>
+
+              {/* Formulaire */}
+              <div style={{ display:'flex', flexDirection:'column', gap:12, marginTop:18 }}>
+                <div>
+                  <span className="item-label">{L.table}</span>
+                  <input className="panier-input" value={table}
+                    onChange={e => setTable(e.target.value)}
+                    placeholder={L.tablePh} />
+                </div>
+                <div>
+                  <span className="item-label">{L.demandes}</span>
+                  <textarea className="panier-input" value={demandes}
+                    onChange={e => setDemandes(e.target.value)}
+                    placeholder={L.demandesPh} rows={2}
+                    style={{ minHeight:64 }} />
+                </div>
+                {error && <p style={{ color:'#ff7675', fontSize:12 }}>⚠ {error}</p>}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer CTA */}
+        {items.length > 0 && (
+          <div style={{
+            padding:'14px 22px 24px',
+            borderTop:'1px solid rgba(196,98,45,0.1)',
+            display:'flex', flexDirection:'column', gap:10,
+            flexShrink:0,
+          }}>
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              style={{
+                width:'100%', padding:'15px',
+                background:'linear-gradient(135deg,#C4622D,#D4724A)',
+                border:'none', borderRadius:14,
+                color:'#FAF7F2',
+                fontFamily:"'Inter',sans-serif",
+                fontSize:14, fontWeight:700,
+                cursor: loading?'not-allowed':'pointer',
+                opacity: loading?0.6:1,
+                boxShadow:'0 6px 20px rgba(196,98,45,0.45)',
+                transition:'all 0.2s', outline:'none',
+                letterSpacing:'0.5px',
+              }}>
+              {loading ? '…' : `✅ ${L.commander}`}
+            </button>
+          </div>
         )}
       </div>
     </div>

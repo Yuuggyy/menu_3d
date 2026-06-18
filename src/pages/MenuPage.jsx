@@ -1,36 +1,32 @@
 import { useState, useEffect } from 'react';
 import { getCategories, getProduits, appelServeur } from '../lib/supabase';
 import Book3D from '../components/Book3D';
-import BookCover from '../components/BookCover';
 import Panier from '../components/Panier';
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-  useEffect(() => {
-    const fn = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', fn);
-    return () => window.removeEventListener('resize', fn);
-  }, []);
-  return isMobile;
-}
-
-const ITEMS_PER_PAGE_MOBILE  = 3;
-const ITEMS_PER_PAGE_DESKTOP = 4;
+const ITEMS_PER_PAGE = 4;
 
 const T = {
   fr: {
-    titre: 'Notre Menu', chargement: 'Chargement…',
-    panier: 'Commande', appelServeurFull: '🔔 Appeler le serveur',
-    tableModal: 'Votre numéro de table ?', tablePh: 'Ex: 5, Bar, Terrasse…',
-    envoyer: 'Appeler', annuler: 'Annuler',
-    appelOk: '🔔 Le serveur arrive !', errTable: 'Indiquez votre numéro de table.',
+    chargement: 'Chargement…',
+    panier: 'Commande',
+    appelServeur: 'Appeler',
+    tableModal: 'Numéro de table',
+    tablePh: 'Ex: 5, Bar, Terrasse…',
+    envoyer: 'Appeler',
+    annuler: 'Annuler',
+    appelOk: '🔔 Le serveur arrive !',
+    errTable: 'Indiquez votre table.',
   },
   en: {
-    titre: 'Our Menu', chargement: 'Loading…',
-    panier: 'Order', appelServeurFull: '🔔 Call waiter',
-    tableModal: 'Your table number?', tablePh: 'e.g. 5, Bar, Terrace…',
-    envoyer: 'Call', annuler: 'Cancel',
-    appelOk: '🔔 Waiter is coming!', errTable: 'Please enter your table number.',
+    chargement: 'Loading…',
+    panier: 'Order',
+    appelServeur: 'Call',
+    tableModal: 'Table number',
+    tablePh: 'e.g. 5, Bar, Terrace…',
+    envoyer: 'Call',
+    annuler: 'Cancel',
+    appelOk: '🔔 Waiter on the way!',
+    errTable: 'Enter your table number.',
   },
 };
 
@@ -46,11 +42,15 @@ export default function MenuPage() {
   const [errAppel, setErrAppel]     = useState('');
   const [toast, setToast]           = useState('');
   const [appelLoading, setAppelLoading] = useState(false);
-  const [coverOpen, setCoverOpen]   = useState(false);
+  const [isMobile, setIsMobile]     = useState(window.innerWidth < 768);
 
-  const isMobile = useIsMobile();
   const L = T[lang];
-  const ITEMS_PER_PAGE = isMobile ? ITEMS_PER_PAGE_MOBILE : ITEMS_PER_PAGE_DESKTOP;
+
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
   useEffect(() => {
     Promise.all([getCategories(), getProduits()]).then(([cats, prods]) => {
@@ -65,13 +65,16 @@ export default function MenuPage() {
     categories.forEach(cat => {
       const catProds = produits.filter(p => p.categorie_id === cat.id);
       if (!catProds.length) return;
-      for (let i = 0; i < catProds.length; i += ITEMS_PER_PAGE)
+      for (let i = 0; i < catProds.length; i += ITEMS_PER_PAGE) {
         pages.push({ categorie: cat, produits: catProds.slice(i, i + ITEMS_PER_PAGE) });
+      }
     });
     const sansCat = produits.filter(p => !p.categorie_id);
-    if (sansCat.length > 0)
-      for (let i = 0; i < sansCat.length; i += ITEMS_PER_PAGE)
+    if (sansCat.length) {
+      for (let i = 0; i < sansCat.length; i += ITEMS_PER_PAGE) {
         pages.push({ categorie: { nom: 'Autres', emoji: '🍽️' }, produits: sansCat.slice(i, i + ITEMS_PER_PAGE) });
+      }
+    }
     return pages;
   };
 
@@ -79,25 +82,24 @@ export default function MenuPage() {
     setPanier(prev => {
       const idx = prev.findIndex(i => i.id === produit.id);
       if (idx >= 0) {
-        const next = [...prev];
-        next[idx] = { ...next[idx], quantite: next[idx].quantite + produit.quantite };
-        return next;
+        const n = [...prev]; n[idx] = { ...n[idx], quantite: n[idx].quantite + produit.quantite }; return n;
       }
       return [...prev, { ...produit }];
     });
-    showToast('✓ ' + produit.nom + ' ajouté');
+    showToast(`✓ ${produit.nom}`);
   };
 
   const handleUpdateQty = (idx, delta) => {
     setPanier(prev => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], quantite: next[idx].quantite + delta };
-      if (next[idx].quantite <= 0) next.splice(idx, 1);
-      return next;
+      const n = [...prev]; n[idx] = { ...n[idx], quantite: n[idx].quantite + delta };
+      if (n[idx].quantite <= 0) n.splice(idx, 1);
+      return n;
     });
   };
 
-  const handleConfirm = (msg) => { setPanier([]); setShowPanier(false); showToast(msg); };
+  const handleRemove   = (idx) => setPanier(prev => prev.filter((_, i) => i !== idx));
+  const handleConfirm  = (msg) => { setPanier([]); setShowPanier(false); showToast(msg); };
+  const showToast      = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3200); };
 
   const handleAppelServeur = async () => {
     if (!tableAppel.trim()) { setErrAppel(L.errTable); return; }
@@ -107,95 +109,232 @@ export default function MenuPage() {
     showToast(L.appelOk);
   };
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
-
-  const pages = buildPages();
+  const pages      = buildPages();
   const totalItems = panier.reduce((s, i) => s + i.quantite, 0);
 
   return (
     <div style={{
       minHeight: '100dvh',
-      background: 'radial-gradient(ellipse at top,#1C1208 0%,#0F0F0E 70%)',
+      background: '#0F0F0E',
       display: 'flex', flexDirection: 'column',
     }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap');
 
-      {/* ══ COUVERTURE (overlay, ne perturbe pas le layout) ══ */}
-      <BookCover
-        restaurantName="MALAMU"
-        onOpen={() => setCoverOpen(true)}
-        lang={lang}
-        visible={!coverOpen}
-      />
+        .malamu-header {
+          background: rgba(15,15,14,0.92);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(196,98,45,0.15);
+          position: sticky; top: 0; z-index: 100;
+          padding: 0 20px;
+          height: 64px;
+          display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .malamu-logo-text {
+          font-family: 'Cormorant Garamond', Georgia, serif;
+          font-size: 26px; font-weight: 600; font-style: italic;
+          color: #F5EFE0;
+          letter-spacing: 1px;
+          line-height: 1;
+        }
+        .malamu-logo-sub {
+          font-family: 'Inter', sans-serif;
+          font-size: 8px; font-weight: 600;
+          color: rgba(196,98,45,0.7);
+          letter-spacing: 3px;
+          text-transform: uppercase;
+          margin-top: 1px;
+        }
+
+        .hdr-btn {
+          display: flex; align-items: center; gap: 6px;
+          padding: 8px 14px; border-radius: 22px;
+          border: 1px solid rgba(196,98,45,0.35);
+          background: rgba(196,98,45,0.07);
+          color: rgba(232,147,106,0.85);
+          font-family: 'Inter', sans-serif;
+          font-size: 12px; font-weight: 600;
+          cursor: pointer; transition: all 0.22s ease;
+          white-space: nowrap; outline: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .hdr-btn:hover {
+          background: rgba(196,98,45,0.15);
+          border-color: rgba(196,98,45,0.6);
+          color: #F5EFE0;
+        }
+        .hdr-btn.active {
+          background: linear-gradient(135deg, #C4622D, #D4724A);
+          border-color: transparent;
+          color: #FAF7F2;
+          box-shadow: 0 4px 16px rgba(196,98,45,0.45);
+        }
+
+        .bell-btn {
+          width: 38px; height: 38px; border-radius: 50%;
+          border: 1px solid rgba(196,98,45,0.3);
+          background: rgba(196,98,45,0.06);
+          color: rgba(232,147,106,0.8);
+          font-size: 16px; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          transition: all 0.2s; outline: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .bell-btn:hover {
+          background: rgba(196,98,45,0.15);
+          border-color: rgba(196,98,45,0.6);
+        }
+
+        /* Loading */
+        @keyframes malamu-spin { to { transform: rotate(360deg); } }
+        .malamu-spinner {
+          width: 36px; height: 36px;
+          border: 3px solid rgba(196,98,45,0.12);
+          border-top-color: #C4622D;
+          border-radius: 50%;
+          animation: malamu-spin 0.9s linear infinite;
+        }
+
+        /* Toast */
+        @keyframes malamu-toast-in {
+          from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .malamu-toast {
+          position: fixed; bottom: 28px; left: 50%;
+          transform: translateX(-50%);
+          background: rgba(25,22,20,0.96);
+          border: 1px solid rgba(196,98,45,0.5);
+          color: #F5EFE0;
+          padding: 12px 24px; border-radius: 40px;
+          font-family: 'Inter', sans-serif;
+          font-size: 13px; font-weight: 500;
+          z-index: 9999;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+          animation: malamu-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1);
+          white-space: nowrap;
+          pointer-events: none;
+        }
+
+        /* Modal */
+        @keyframes malamu-modal-in {
+          from { opacity: 0; transform: scale(0.88) translateY(18px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .malamu-modal-overlay {
+          position: fixed; inset: 0;
+          background: rgba(0,0,0,0.85);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+          z-index: 500;
+          display: flex; align-items: center; justify-content: center;
+          padding: 20px;
+        }
+        .malamu-modal {
+          background: #1A1917;
+          border: 1px solid rgba(196,98,45,0.25);
+          border-radius: 20px;
+          padding: 32px 28px;
+          width: 100%; max-width: 420px;
+          box-shadow: 0 28px 64px rgba(0,0,0,0.8);
+          animation: malamu-modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .malamu-input {
+          width: 100%; padding: 13px 16px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(196,98,45,0.25);
+          border-radius: 10px;
+          color: #F5EFE0;
+          font-family: 'Inter', sans-serif; font-size: 14px;
+          outline: none; transition: border 0.2s;
+          box-sizing: border-box;
+        }
+        .malamu-input:focus { border-color: #C4622D; background: rgba(196,98,45,0.05); }
+        .malamu-input::placeholder { color: rgba(245,239,224,0.25); }
+
+        .malamu-btn-primary {
+          width: 100%; padding: 14px;
+          background: linear-gradient(135deg, #C4622D, #D4724A);
+          border: none; border-radius: 12px;
+          color: #FAF7F2;
+          font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+          cursor: pointer; letter-spacing: 0.5px;
+          box-shadow: 0 5px 18px rgba(196,98,45,0.4);
+          transition: all 0.2s; outline: none;
+        }
+        .malamu-btn-primary:hover { transform: translateY(-1.5px); box-shadow: 0 8px 24px rgba(196,98,45,0.55); }
+        .malamu-btn-primary:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
+
+        .malamu-btn-secondary {
+          width: 100%; padding: 13px;
+          background: transparent;
+          border: 1px solid rgba(196,98,45,0.25);
+          border-radius: 12px;
+          color: rgba(232,147,106,0.7);
+          font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+          cursor: pointer; outline: none; transition: all 0.2s;
+        }
+        .malamu-btn-secondary:hover { background: rgba(196,98,45,0.07); border-color: rgba(196,98,45,0.45); }
+      `}</style>
 
       {/* ══ HEADER ══ */}
-      <header style={{
-        padding: isMobile ? '10px 14px' : '14px 28px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid rgba(196,98,45,0.15)',
-        backdropFilter: 'blur(12px)',
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(15,15,14,0.92)',
-        gap: 8,
-      }}>
-        <h1 style={{
-          fontFamily: "'Cormorant Garamond','Playfair Display',serif",
-          fontSize: isMobile ? 17 : 24, fontWeight: 700,
-          background: 'linear-gradient(135deg,#C4622D,#E8936A)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          letterSpacing: '0.5px', whiteSpace: 'nowrap', flexShrink: 0,
-        }}>✦ {L.titre}</h1>
+      <header className="malamu-header">
+        {/* Logo */}
+        <div>
+          <div className="malamu-logo-text">Malamu</div>
+          <div className="malamu-logo-sub">Resto · Bar · Expériences</div>
+        </div>
 
-        <div style={{ display:'flex', alignItems:'center', gap: isMobile?6:10 }}>
+        {/* Actions */}
+        <div style={{ display:'flex', alignItems:'center', gap: isMobile ? 8 : 10 }}>
           {/* Langue */}
-          <button onClick={() => setLang(l => l==='fr'?'en':'fr')} style={{
-            background:'rgba(196,98,45,0.1)', border:'1px solid rgba(196,98,45,0.25)',
-            color:'#E8936A', borderRadius:8, padding: isMobile?'5px 9px':'7px 13px',
-            fontSize: isMobile?11:12, fontWeight:700, cursor:'pointer', whiteSpace:'nowrap',
-          }}>{lang==='fr'?'🇬🇧':'🇫🇷'}</button>
+          <button className="hdr-btn" onClick={() => setLang(l => l==='fr'?'en':'fr')}
+            style={{ padding: isMobile ? '7px 10px' : '8px 14px' }}>
+            {lang==='fr' ? '🇬🇧' : '🇫🇷'}
+            {!isMobile && <span>{lang==='fr'?'EN':'FR'}</span>}
+          </button>
 
-          {/* Appel serveur */}
-          <button onClick={() => setShowAppel(true)} style={{
-            background:'rgba(196,98,45,0.1)', border:'1px solid rgba(196,98,45,0.25)',
-            color:'#E8936A', borderRadius:8, padding: isMobile?'5px 9px':'7px 13px',
-            fontSize: isMobile?11:13, fontWeight:600, cursor:'pointer', whiteSpace:'nowrap',
-          }}>{isMobile?'🔔':L.appelServeurFull}</button>
+          {/* Bell */}
+          <button className="bell-btn" onClick={() => setShowAppel(true)} title={L.appelServeur}>
+            🔔
+          </button>
 
           {/* Panier */}
-          <button onClick={() => setShowPanier(true)} style={{
-            background: totalItems>0
-              ? 'linear-gradient(135deg,#C4622D,#E8936A)'
-              : 'rgba(196,98,45,0.1)',
-            border:'1px solid rgba(196,98,45,0.25)',
-            color: totalItems>0?'#1a0a00':'#E8936A',
-            borderRadius:8, padding: isMobile?'5px 10px':'7px 15px',
-            fontSize: isMobile?11:13, fontWeight:700, cursor:'pointer',
-            display:'flex', alignItems:'center', gap:5, whiteSpace:'nowrap',
-            boxShadow: totalItems>0?'0 3px 12px rgba(196,98,45,0.35)':'none',
-          }}>
-            🛒 {!isMobile && L.panier}
-            {totalItems>0 && (
+          <button
+            className={'hdr-btn' + (totalItems>0?' active':'')}
+            onClick={() => setShowPanier(true)}
+            style={{ gap: 7 }}>
+            🛒
+            {!isMobile && <span>{L.panier}</span>}
+            {totalItems > 0 && (
               <span style={{
-                background:'#1a0a00', color:'#E8936A', borderRadius:'50%',
-                width: isMobile?18:22, height: isMobile?18:22,
+                background: 'rgba(255,255,255,0.25)',
+                borderRadius:'50%', width:20, height:20,
                 display:'flex', alignItems:'center', justifyContent:'center',
-                fontSize: isMobile?10:11, fontWeight:800,
+                fontSize:10, fontWeight:800,
               }}>{totalItems}</span>
             )}
           </button>
         </div>
       </header>
 
-      {/* ══ CONTENU ══ */}
+      {/* ══ MAIN ══ */}
       <main style={{
         flex: 1,
-        padding: isMobile ? '12px 8px 80px' : '24px 20px 60px',
-        maxWidth: 900, width: '100%', margin: '0 auto',
+        padding: isMobile ? '20px 14px 70px' : '36px 28px 60px',
+        maxWidth: 920, margin: '0 auto', width: '100%',
         boxSizing: 'border-box',
       }}>
         {loading ? (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:16, padding:'80px 0' }}>
-            <div className="spinner" />
-            <p style={{ color:'rgba(201,168,76,0.5)', fontSize:14 }}>{L.chargement}</p>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:18, padding:'100px 0' }}>
+            <div className="malamu-spinner" />
+            <p style={{
+              fontFamily:"'Cormorant Garamond',serif",
+              fontSize:16, fontStyle:'italic',
+              color:'rgba(245,239,224,0.35)',
+            }}>{L.chargement}</p>
           </div>
         ) : (
           <Book3D pages={pages} onAdd={handleAdd} lang={lang} isMobile={isMobile} />
@@ -205,40 +344,46 @@ export default function MenuPage() {
       {/* ══ PANIER ══ */}
       {showPanier && (
         <Panier
-          items={panier} onUpdateQty={handleUpdateQty}
-          onRemove={idx => setPanier(prev => prev.filter((_,i)=>i!==idx))}
+          items={panier}
+          onUpdateQty={handleUpdateQty}
+          onRemove={handleRemove}
           onClose={() => setShowPanier(false)}
           onConfirm={handleConfirm}
-          lang={lang} isMobile={isMobile}
+          lang={lang}
         />
       )}
 
       {/* ══ MODAL APPEL SERVEUR ══ */}
       {showAppel && (
-        <div className="modal-overlay" onClick={() => setShowAppel(false)}>
-          <div className="modal" style={{ maxWidth: isMobile?'92vw':420 }} onClick={e=>e.stopPropagation()}>
-            <div style={{ textAlign:'center', marginBottom:20 }}>
-              <div style={{ fontSize: isMobile?40:48, marginBottom:10 }}>🔔</div>
-              <h2 style={{
+        <div className="malamu-modal-overlay" onClick={() => setShowAppel(false)}>
+          <div className="malamu-modal" onClick={e => e.stopPropagation()}>
+            <div style={{ textAlign:'center', marginBottom:28 }}>
+              <div style={{ fontSize:44, marginBottom:10 }}>🔔</div>
+              <p style={{
                 fontFamily:"'Cormorant Garamond',serif",
-                fontSize: isMobile?18:21, color:'#E8936A', fontWeight:700,
-              }}>{L.tableModal}</h2>
+                fontSize:22, fontWeight:600,
+                color:'#F5EFE0', marginBottom:4,
+              }}>{L.tableModal}</p>
+              <p style={{ fontSize:12, color:'rgba(196,98,45,0.6)', letterSpacing:'1px' }}>
+                MALAMU • KINSHASA
+              </p>
             </div>
-            <div style={{ marginBottom:16 }}>
-              <input className="input" value={tableAppel}
-                onChange={e => { setTableAppel(e.target.value); setErrAppel(''); }}
-                placeholder={L.tablePh}
-                onKeyDown={e => e.key==='Enter' && handleAppelServeur()}
-                autoFocus style={{ fontSize: isMobile?16:14 }}
-              />
-              {errAppel && <p style={{ color:'#ff7675', fontSize:12, marginTop:6 }}>⚠️ {errAppel}</p>}
-            </div>
-            <div style={{ display:'flex', gap:10 }}>
-              <button className="btn btn-dark" onClick={() => setShowAppel(false)}
-                style={{ flex:1, padding: isMobile?'12px':'10px' }}>{L.annuler}</button>
-              <button className="btn btn-gold" onClick={handleAppelServeur} disabled={appelLoading}
-                style={{ flex:1, padding: isMobile?'12px':'10px' }}>
-                {appelLoading ? '⏳' : '🔔 ' + L.envoyer}
+            <input className="malamu-input" value={tableAppel}
+              onChange={e => { setTableAppel(e.target.value); setErrAppel(''); }}
+              placeholder={L.tablePh}
+              onKeyDown={e => e.key==='Enter' && handleAppelServeur()}
+              autoFocus
+              style={{ marginBottom: errAppel ? 6 : 16 }}
+            />
+            {errAppel && (
+              <p style={{ color:'#ff7675', fontSize:12, marginBottom:12 }}>⚠ {errAppel}</p>
+            )}
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              <button className="malamu-btn-primary" onClick={handleAppelServeur} disabled={appelLoading}>
+                {appelLoading ? '…' : `🔔 ${L.envoyer}`}
+              </button>
+              <button className="malamu-btn-secondary" onClick={() => setShowAppel(false)}>
+                {L.annuler}
               </button>
             </div>
           </div>
@@ -246,11 +391,7 @@ export default function MenuPage() {
       )}
 
       {/* ══ TOAST ══ */}
-      {toast && (
-        <div className="toast" style={{ fontSize: isMobile?13:14, maxWidth:'85vw' }}>
-          {toast}
-        </div>
-      )}
+      {toast && <div className="malamu-toast">{toast}</div>}
     </div>
   );
 }
