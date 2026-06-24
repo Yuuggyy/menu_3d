@@ -412,7 +412,7 @@ function initMenu(categories, produits, createCommande, appelServeur) {
         const app = document.getElementById('m-app');
         if (app) { app.style.opacity = '0'; app.style.transform = 'translateY(8px)'; }
         requestAnimationFrame(() => {
-          if (app) { app.style.transition = 'opacity 0.5s ease, transform 0.5s ease'; app.style.opacity = '1'; app.style.transform = 'translateY(0)'; }
+          if (app) { app.style.transition = 'opacity 0.3s ease'; app.style.opacity = '1'; app.style.transform = 'translateY(0)'; }
         });
       });
 
@@ -564,21 +564,15 @@ function initMenu(categories, produits, createCommande, appelServeur) {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       background: #F5EFE0;
-      opacity: 0; transition: opacity 0.5s ease;
+      opacity: 0; transition: opacity 0.3s ease; will-change: opacity;
     }
     #m-cover-screen.visible { opacity: 1; }
     #m-cover-screen.closing {
-      opacity: 0; transform: scale(0.97);
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      opacity: 0;
+      transition: opacity 0.35s ease;
     }
 
-    .m-cover-bg {
-      position: absolute; inset: 0;
-      background-image:
-        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(196,98,45,0.07) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 100% 100%, rgba(196,98,45,0.05) 0%, transparent 70%);
-      pointer-events: none;
-    }
+    .m-cover-bg { display: none; }
 
     .m-cover-content {
       position: relative; z-index: 1;
@@ -732,10 +726,7 @@ function initMenu(categories, produits, createCommande, appelServeur) {
       display: flex; position: relative;
       height: clamp(300px, 52vh, 540px);
       border-radius: 3px 10px 10px 3px;
-      box-shadow:
-        0 1px 3px rgba(0,0,0,0.06),
-        0 6px 20px rgba(0,0,0,0.09),
-        0 20px 56px rgba(0,0,0,0.13);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.12);
       transform-style: preserve-3d;
     }
 
@@ -772,21 +763,13 @@ function initMenu(categories, produits, createCommande, appelServeur) {
     }
     .m-page-paper.left {
       background: linear-gradient(to left, #EAE0CA, #F5EFE0);
-      box-shadow: inset -5px 0 16px rgba(0,0,0,0.06);
+      box-shadow: inset -3px 0 8px rgba(0,0,0,0.04);
     }
     .m-page-paper.right {
       background: linear-gradient(to right, #EAE0CA, #F5EFE0);
-      box-shadow: inset 5px 0 16px rgba(0,0,0,0.06);
+      box-shadow: inset 3px 0 8px rgba(0,0,0,0.04);
     }
-    /* Texture lignes papier */
-    .m-page-paper::before {
-      content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
-      background-image: repeating-linear-gradient(
-        transparent, transparent 31px,
-        rgba(15,15,14,0.03) 31px, rgba(15,15,14,0.03) 32px
-      );
-      background-position-y: 70px;
-    }
+    .m-page-paper::before { display: none; }
 
     .m-page-ornament {
       flex: 1; display: flex; align-items: center; justify-content: center;
@@ -914,10 +897,7 @@ function initMenu(categories, produits, createCommande, appelServeur) {
     .m-mob-page {
       width: 100%; min-height: calc(100dvh - 170px);
       border-radius: 8px; overflow: hidden;
-      box-shadow:
-        0 2px 4px rgba(0,0,0,0.05),
-        0 8px 20px rgba(0,0,0,0.09),
-        5px 0 0 #C9BBA6, 9px 0 0 #B9AB96;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.10), 4px 0 0 #C9BBA6, 8px 0 0 #B9AB96;
     }
     .m-mob-page .m-page-paper { min-height: inherit; }
 
@@ -962,6 +942,7 @@ function initMenu(categories, produits, createCommande, appelServeur) {
       position: absolute; top: 0; bottom: 0;
       transform-style: preserve-3d;
       z-index: 20; pointer-events: none;
+      will-change: transform;
     }
     .m-flip.dir-next { left: 50%; right: 0; transform-origin: left center; }
     .m-flip.dir-prev { left: 0; right: 50%; transform-origin: right center; }
@@ -970,16 +951,16 @@ function initMenu(categories, produits, createCommande, appelServeur) {
     .m-flip.dir-prev.go { animation: mFlipPrev 0.85s cubic-bezier(0.23,1,0.32,1) forwards; }
 
     @keyframes mFlipNext {
-      0%   { transform: rotateY(0deg);    filter: brightness(1); }
-      25%  { transform: rotateY(-52deg);  filter: brightness(0.83); }
-      60%  { transform: rotateY(-128deg); filter: brightness(0.88); }
-      100% { transform: rotateY(-180deg); filter: brightness(1); }
+      0%   { transform: rotateY(0deg); }
+      25%  { transform: rotateY(-52deg); }
+      60%  { transform: rotateY(-128deg); }
+      100% { transform: rotateY(-180deg); }
     }
     @keyframes mFlipPrev {
-      0%   { transform: rotateY(0deg);   filter: brightness(1); }
-      25%  { transform: rotateY(52deg);  filter: brightness(0.83); }
-      60%  { transform: rotateY(128deg); filter: brightness(0.88); }
-      100% { transform: rotateY(180deg); filter: brightness(1); }
+      0%   { transform: rotateY(0deg); }
+      25%  { transform: rotateY(52deg); }
+      60%  { transform: rotateY(128deg); }
+      100% { transform: rotateY(180deg); }
     }
 
     .m-flip-face {
@@ -1007,7 +988,6 @@ function initMenu(categories, produits, createCommande, appelServeur) {
     .m-overlay {
       position: fixed; inset: 0; z-index: 500;
       background: rgba(15,15,14,0.55);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       display: flex; align-items: flex-end; justify-content: center;
     }
     .m-overlay.modal { align-items: center; padding: 20px; }
