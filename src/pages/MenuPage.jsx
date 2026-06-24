@@ -16,10 +16,18 @@ export default function MenuPage() {
     const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
     Promise.all([
-      sb.from('categories').select('*').eq('actif', true).order('ordre'),
-      sb.from('produits').select('*').eq('disponible', true).order('ordre'),
+      sb.from('categories').select('*').order('position'),
+      sb.from('dishes').select('*').eq('available', true).order('position'),
     ]).then(([{ data: cats }, { data: prods }]) => {
-      initMenu(cats || [], prods || [], createCommande, appelServeur);
+      // Normaliser les champs pour le reste du code (name→nom, category_id→categorie_id)
+      const normCats = (cats || []).map(c => ({
+        ...c, nom: c.name, ordre: c.position
+      }));
+      const normProds = (prods || []).map(p => ({
+        ...p, nom: p.name, prix: parseFloat(p.price) || p.price, categorie_id: p.category_id,
+        disponible: p.available, ordre: p.position
+      }));
+      initMenu(normCats, normProds, createCommande, appelServeur);
     });
   }, []);
 

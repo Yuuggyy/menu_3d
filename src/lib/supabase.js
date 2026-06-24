@@ -5,38 +5,65 @@ const SUPABASE_ANON = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── Produits & Catégories ──
-export const getCategories = () =>
-  supabase.from('categories').select('*').eq('actif', true).order('ordre');
+/* ─── Schéma réel Supabase Malamu ───────────────────────────
+   categories : id, name, position, created_at
+   dishes     : id, category_id, name, description, price, image_url, position, available, created_at
+   orders     : id, ... (vide pour l'instant — à créer si besoin)
+──────────────────────────────────────────────────────────── */
 
+// ── Catégories ──
+export const getCategories = () =>
+  supabase
+    .from('categories')
+    .select('*')
+    .order('position');
+
+// ── Plats ──
 export const getProduits = () =>
-  supabase.from('produits').select('*, categories(nom, emoji)').eq('disponible', true).order('ordre');
+  supabase
+    .from('dishes')
+    .select('*, categories(name)')
+    .eq('available', true)
+    .order('position');
 
 export const getProduitsByCategorie = (catId) =>
-  supabase.from('produits').select('*').eq('categorie_id', catId).eq('disponible', true).order('ordre');
+  supabase
+    .from('dishes')
+    .select('*')
+    .eq('category_id', catId)
+    .eq('available', true)
+    .order('position');
 
 // ── Commandes ──
 export const createCommande = async (numeroTable, items, demandesSpeciales) => {
   const montantTotal = items.reduce((sum, i) => sum + i.prix_unit * i.quantite, 0);
   const { data: cmd, error } = await supabase
-    .from('commandes')
-    .insert({ numero_table: numeroTable, demandes_speciales: demandesSpeciales, montant_total: montantTotal })
-    .select().single();
+    .from('orders')
+    .insert({
+      table_number: numeroTable,
+      special_requests: demandesSpeciales,
+      total_amount: montantTotal,
+      status: 'pending',
+    })
+    .select()
+    .single();
   if (error) return { error };
-  const lignes = items.map(i => ({
-    commande_id: cmd.id,
-    produit_id:  i.id,
-    nom_produit: i.nom,
-    prix_unit:   i.prix_unit,
-    quantite:    i.quantite,
-  }));
-  const { error: err2 } = await supabase.from('commande_items').insert(lignes);
-  return { data: cmd, error: err2 };
+  return { data: cmd, error: null };
 };
 
 // ── Appel serveur ──
-export const appelServeur = (numeroTable) =>
-  supabase.from('appels_serveur').insert({ numero_table: numeroTable });
+export const appelServeur = async (numeroTable) => {
+  // On insère dans orders avec un flag "waiter_call"
+  const { data, error } = await supabase
+    .from('orders')
+    .insert({
+      table_number: numeroTable,
+      special_requests: 'APPEL SERVEUR',
+      total_amount: 0,
+      status: 'waiter_call',
+    });
+  return { data, error };
+};
 
 // ── Admin ──
 export const signInAdmin = (email, password) =>
@@ -45,33 +72,34 @@ export const signInAdmin = (email, password) =>
 export const signOutAdmin = () => supabase.auth.signOut();
 
 export const getCommandes = () =>
-  supabase.from('commandes')
-    .select('*, commande_items(*, produits(nom))')
+  supabase
+    .from('orders')
+    .select('*')
     .order('created_at', { ascending: false });
 
 export const updateStatutCommande = (id, statut) =>
-  supabase.from('commandes').update({ statut }).eq('id', id);
-
-export const getAppels = () =>
-  supabase.from('appels_serveur').select('*').order('created_at', { ascending: false });
-
-export const traiterAppel = (id) =>
-  supabase.from('appels_serveur').update({ traite: true }).eq('id', id);
+  supabase.from('orders').update({ status: statut }).eq('id', id);
 
 export const getAllProduits = () =>
-  supabase.from('produits').select('*, categories(nom)').order('ordre');
+  supabase
+    .from('dishes')
+    .select('*, categories(name)')
+    .order('position');
 
 export const getAllCategories = () =>
-  supabase.from('categories').select('*').order('ordre');
+  supabase
+    .from('categories')
+    .select('*')
+    .order('position');
 
 export const createProduit = (p) =>
-  supabase.from('produits').insert(p).select().single();
+  supabase.from('dishes').insert(p).select().single();
 
 export const updateProduit = (id, p) =>
-  supabase.from('produits').update(p).eq('id', id);
+  supabase.from('dishes').update(p).eq('id', id);
 
 export const deleteProduit = (id) =>
-  supabase.from('produits').delete().eq('id', id);
+  supabase.from('dishes').delete().eq('id', id);
 
 export const createCategorie = (c) =>
   supabase.from('categories').insert(c).select().single();
@@ -81,3 +109,14 @@ export const updateCategorie = (id, c) =>
 
 export const deleteCategorie = (id) =>
   supabase.from('categories').delete().eq('id', id);
+
+// ── Appels serveur (alias pour compatibilité AdminPage) ──
+export const getAppels = () =>
+  supabase
+    .from('orders')
+    .select('*')
+    .eq('status', 'waiter_call')
+    .order('created_at', { ascending: false });
+
+export const traiterAppel = (id) =>
+  supabase.from('orders').update({ status: 'handled' }).eq('id', id);
