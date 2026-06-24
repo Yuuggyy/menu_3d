@@ -325,7 +325,7 @@ export default function AdminPage() {
       </div>
       <div style={{display:'flex',gap:4,padding:'0 24px',borderBottom:'1px solid rgba(255,255,255,0.08)',overflowX:'auto'}}>
         {TABS.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:'14px 20px',border:'none',background:'transparent',color:tab===t.id?'#C4622D':'rgba(255,255,255,0.4)',borderBottom:tab===t.id?'2px solid #C4622D':'2px solid transparent',cursor:'pointer',fontSize:14,fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:tab===t.id?700:400,whiteSpace:'nowrap',transition:'color 0.2s'}}>
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{padding:'14px 20px',border:'none',background:'transparent',color:tab===t.id?'#C4622D':'rgba(255,255,255,0.4)',borderBottom:tab===t.id?'2px solid #C4622D':'2px solid transparent',cursor:'pointer',fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:tab===t.id?700:400,whiteSpace:'nowrap',transition:'color 0.2s'}}>
             {t.label}
           </button>
         ))}

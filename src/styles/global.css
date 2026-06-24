@@ -1,6 +1,26 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body, #root { height: 100%; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Inter', sans-serif; background: #0D0C0B; color: #F0EBE3; overflow-x: hidden; }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(196,98,45,0.3); border-radius: 2px; }
+html { -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Inter', sans-serif; background: #F5EFE0; color: #0F0F0E; overflow-x: hidden; }
+
+/* ── Admin CSS helpers ── */
+.label { display:block; font-size:11px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; color:rgba(245,239,224,0.5); margin-bottom:5px; }
+.input { width:100%; background:rgba(245,239,224,0.06); border:1px solid rgba(245,239,224,0.12); border-radius:6px; padding:10px 12px; color:#F5EFE0; font-size:14px; outline:none; transition:border-color 0.2s; }
+.input:focus { border-color:rgba(196,98,45,0.6); }
+select.input { cursor:pointer; }
+textarea.input { resize:vertical; }
+.btn { border:none; border-radius:6px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; transition:all 0.2s; outline:none; display:inline-flex; align-items:center; gap:6px; }
+.btn-gold { background:#C4622D; color:#F5EFE0; }
+.btn-gold:hover { background:#d96e35; }
+.btn-dark { background:rgba(245,239,224,0.08); color:rgba(245,239,224,0.7); border:1px solid rgba(245,239,224,0.1); }
+.btn-dark:hover { background:rgba(245,239,224,0.12); }
+.btn-green { background:rgba(85,239,196,0.15); color:#55efc4; border:1px solid rgba(85,239,196,0.3); }
+.btn-red { background:rgba(255,118,117,0.15); color:#ff7675; border:1px solid rgba(255,118,117,0.3); }
+.btn-sm { padding:5px 10px; font-size:11px; }
+.card { background:rgba(245,239,224,0.04); border:1px solid rgba(245,239,224,0.08); border-radius:10px; }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.badge-pending { background:rgba(253,203,110,0.2); color:#fdcb6e; }
+.badge-in_progress { background:rgba(255,118,117,0.2); color:#ff7675; }
+.badge-done { background:rgba(85,239,196,0.2); color:#55efc4; }
+.badge-cancelled { background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.3); }
+.spinner { width:28px; height:28px; border:2px solid rgba(196,98,45,0.2); border-top-color:#C4622D; border-radius:50%; animation:spin 0.7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }

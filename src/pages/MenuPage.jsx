@@ -31,7 +31,7 @@ export default function MenuPage() {
     });
   }, []);
 
-  return <div id="malamu-root" style={{ position:'fixed', inset:0, zIndex:0 }} />;
+  return <div id="malamu-root" />;
 }
 
 /* ═══════════════════════════════════════════════════════════
