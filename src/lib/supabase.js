@@ -46,11 +46,23 @@ export const getCommandes = () =>
 export const updateStatutCommande = (id, status) =>
   supabase.from('orders').update({ status }).eq('id', id);
 
+export const deleteCommande = (id) =>
+  supabase.from('orders').delete().eq('id', id);
+
+export const deleteAllCommandes = () =>
+  supabase.from('orders').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
 export const getAppels = () =>
   supabase.from('waiter_calls').select('*').order('created_at', { ascending: false });
 
 export const traiterAppel = (id) =>
   supabase.from('waiter_calls').update({ handled: true }).eq('id', id);
+
+export const deleteAppel = (id) =>
+  supabase.from('waiter_calls').delete().eq('id', id);
+
+export const deleteAllAppels = () =>
+  supabase.from('waiter_calls').delete().neq('id', '00000000-0000-0000-0000-000000000000');
 
 export const getAllProduits = () =>
   supabase.from('dishes').select('*, categories(name)').order('position');
