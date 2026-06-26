@@ -15,7 +15,7 @@ export const getProduitsByCategorie = (catId) =>
   supabase.from('dishes').select('*').eq('category_id', catId).eq('available', true).order('position');
 
 export const createCommande = async (tableNumber, items, specialRequests) => {
-  const totalAmount = items.reduce((sum, i) => sum + parseFloat(i.prix) * i.quantite, 0);
+  const totalAmount = items.reduce((sum, i) => sum + parseFloat(i.prix_unit) * i.quantite, 0);
   const { data: cmd, error } = await supabase
     .from('orders')
     .insert({ table_number: tableNumber, special_requests: specialRequests, total_amount: totalAmount, status: 'pending' })
@@ -25,7 +25,7 @@ export const createCommande = async (tableNumber, items, specialRequests) => {
     order_id: cmd.id,
     dish_id: i.id,
     dish_name: i.nom,
-    price: parseFloat(i.prix),
+    price: parseFloat(i.prix_unit),
     quantity: i.quantite,
   }));
   const { error: err2 } = await supabase.from('order_items').insert(lignes);
@@ -87,3 +87,4 @@ export const updateCategorie = (id, c) =>
 
 export const deleteCategorie = (id) =>
   supabase.from('categories').delete().eq('id', id);
+
