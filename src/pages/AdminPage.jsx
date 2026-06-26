@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   signInAdmin, signOutAdmin,
-  getCommandes, updateStatutCommande,
-  getAppels, traiterAppel,
+  getCommandes, updateStatutCommande, deleteCommande, deleteAllCommandes,
+  getAppels, traiterAppel, deleteAppel, deleteAllAppels,
   getAllProduits, getAllCategories,
   createProduit, updateProduit, deleteProduit,
   createCategorie, updateCategorie, deleteCategorie,
@@ -64,13 +64,34 @@ function CommandesTab() {
     load();
   };
 
+  const annuler=async(cmd)=>{
+    if(!window.confirm('Annuler cette commande ?'))return;
+    await updateStatutCommande(cmd.id,'cancelled');
+    load();
+  };
+
+  const supprimer=async(cmd)=>{
+    if(!window.confirm('Supprimer définitivement cette commande ?'))return;
+    await deleteCommande(cmd.id);
+    load();
+  };
+
+  const toutSupprimer=async()=>{
+    if(!window.confirm('Supprimer TOUTES les commandes ? Cette action est irréversible.'))return;
+    await deleteAllCommandes();
+    load();
+  };
+
   const filtered=filtre==='all'?commandes:commandes.filter(c=>c.status===filtre);
 
   return(
     <div>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,flexWrap:'wrap',gap:8}}>
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:'#C4622D'}}>Commandes</h2>
-        <button onClick={load} className="btn btn-dark btn-sm">🔄</button>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={load} className="btn btn-dark btn-sm">🔄</button>
+          <button onClick={toutSupprimer} className="btn btn-red btn-sm">🗑️ Tout supprimer</button>
+        </div>
       </div>
       <div style={{display:'flex',gap:8,marginBottom:20,flexWrap:'wrap'}}>
         {['all',...STATUTS].map(s=>(
@@ -100,11 +121,19 @@ function CommandesTab() {
                 <p style={{fontSize:12,color:'#f9ca24'}}>💬 {cmd.special_requests}</p>
               </div>
             )}
-            {STATUT_NEXT[cmd.status]&&(
-              <button className="btn btn-gold btn-sm" onClick={()=>nextStatut(cmd)}>
-                {cmd.status==='pending'?'🔥 Mettre en cours':'✅ Marquer terminée'}
-              </button>
-            )}
+            <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+              {STATUT_NEXT[cmd.status]&&(
+                <button className="btn btn-gold btn-sm" onClick={()=>nextStatut(cmd)}>
+                  {cmd.status==='pending'?'🔥 Mettre en cours':'✅ Marquer terminée'}
+                </button>
+              )}
+              {cmd.status!=='cancelled'&&cmd.status!=='done'&&(
+                <button className="btn btn-sm" style={{background:'rgba(255,118,118,0.15)',color:'#ff7675',border:'1px solid rgba(255,118,118,0.3)'}} onClick={()=>annuler(cmd)}>
+                  ❌ Annuler
+                </button>
+              )}
+              <button className="btn btn-red btn-sm" onClick={()=>supprimer(cmd)}>🗑️</button>
+            </div>
           </div>
         ))}
       </div>}
@@ -126,17 +155,33 @@ function AppelsTab() {
   useEffect(()=>{load();const iv=setInterval(load,10000);return()=>clearInterval(iv);},[]);
 
   const traiter=async(id)=>{await traiterAppel(id);load();};
+
+  const supprimer=async(id)=>{
+    if(!window.confirm('Supprimer cet appel ?'))return;
+    await deleteAppel(id);
+    load();
+  };
+
+  const toutSupprimer=async()=>{
+    if(!window.confirm('Supprimer TOUS les appels ?'))return;
+    await deleteAllAppels();
+    load();
+  };
+
   const nonTraites=appels.filter(a=>!a.handled);
   const traites=appels.filter(a=>a.handled);
 
   return(
     <div>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,flexWrap:'wrap',gap:8}}>
         <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:'#C4622D'}}>
           Appels Serveur
           {nonTraites.length>0&&<span style={{marginLeft:10,background:'#C4622D',color:'#F5EFE0',borderRadius:'50%',width:24,height:24,display:'inline-flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:800}}>{nonTraites.length}</span>}
         </h2>
-        <button onClick={load} className="btn btn-dark btn-sm">🔄</button>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={load} className="btn btn-dark btn-sm">🔄</button>
+          <button onClick={toutSupprimer} className="btn btn-red btn-sm">🗑️ Tout supprimer</button>
+        </div>
       </div>
       {loading?<div style={{display:'flex',justifyContent:'center',padding:40}}><div className="spinner"/></div>
       :appels.length===0?<div style={{textAlign:'center',padding:60,color:'rgba(255,255,255,0.3)'}}><div style={{fontSize:40,marginBottom:12}}>🔕</div><p>Aucun appel</p></div>
@@ -148,8 +193,11 @@ function AppelsTab() {
                 <p style={{fontWeight:700,fontSize:15,color:appel.handled?'rgba(255,255,255,0.5)':'#f5efe0'}}>🪑 Table {appel.table_number}</p>
                 <p style={{fontSize:12,color:'rgba(255,255,255,0.4)',marginTop:2}}>{new Date(appel.created_at).toLocaleString('fr-FR')}</p>
               </div>
-              {!appel.handled&&<button className="btn btn-green btn-sm" onClick={()=>traiter(appel.id)}>✓ Traité</button>}
-              {appel.handled&&<span style={{color:'#55efc4',fontSize:13}}>✅ Traité</span>}
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                {!appel.handled&&<button className="btn btn-green btn-sm" onClick={()=>traiter(appel.id)}>✓ Traité</button>}
+                {appel.handled&&<span style={{color:'#55efc4',fontSize:13}}>✅ Traité</span>}
+                <button className="btn btn-red btn-sm" onClick={()=>supprimer(appel.id)}>🗑️</button>
+              </div>
             </div>
           </div>
         ))}
